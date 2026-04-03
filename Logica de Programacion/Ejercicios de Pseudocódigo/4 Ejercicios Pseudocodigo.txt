@@ -1,0 +1,85 @@
+Ejercicios Pseudocodigo
+
+1. Cree un pseudocódigo que le pida un precio de producto al usuario, calcule su descuento y muestre el precio final tomando en cuenta que:
+Si el precio es menor a 100, el descuento es del 2%.
+Si el precio es mayor o igual a 100, el descuento es del 10%.
+
+Inicio
+  Definir precio
+  Definir monto_descuento
+  Definir porc_desc_menor_cien = 0.02
+  Definir porc_desc_mayor_igual_cien = 0.1
+
+  Mostrar "Por favor ingresar el precio del producto: "
+  Pedir precio
+
+  Si (precio < 100) entonces:
+    monto_descuento = precio * porc_desc_menor_cien
+  Sino
+    monto_descuento = precio * porc_desc_mayor_igual_cien
+  FinSi
+
+  Mostrar "El precio final es: "
+  Mostrar (precio - descuento)
+
+Fin
+
+-------------
+
+2. Cree un pseudocódigo que le pida un tiempo en segundos al usuario y calcule si es menor o mayor a 10 minutos. Si es menor, muestre cuantos segundos faltarían para llegar a 10 minutos. Si es mayor, muestre “Mayor”. Si es exactamente igual, muestre “Igual”.
+
+Inicio
+  Definir segundos
+  Definir segundos_diez_minutos = 600
+
+  Mostrar "Ingrese la cantidad de segundos: "
+  Pedir segundos
+
+  Si (segundos < segundos_diez_minutos) entonces:
+    Mostrar "Segundos que faltan para que sean 10 minutos: "
+    Mostrar (segundos_diez_minutos - segundos)
+  Sino
+    Si (segundos == segundos_diez_minutos) entonces:
+      Mostrar "Igual"
+    Sino
+      Mostrar "Mayor"
+    FinSi
+  FinSi
+Fin
+
+-------------
+
+3. Cree un algoritmo que le pida un numero al usuario, y realice una suma de cada numero del 1 hasta ese número ingresado. Luego muestre el resultado de la suma.
+
+Inicio
+  Definir numero
+  Definir contador = 1
+  Definir suma = 0
+  Definir continuar = 1
+
+  Mientras que (continuar == 1) repetir:
+
+    Mostrar "Ingrese el numero mayor o igual que 1: "
+    Pedir numero
+
+    Si (numero >= 1) entonces:
+
+      Mientras que (contador <= numero) repetir:
+        suma = suma + contador
+        contador = contador + 1
+      FinMientras
+
+      Mostrar "La suma de numeros desde el 1 hasta el numero ingresado es: "
+      Mostrar suma
+
+    Sino
+
+      Mostrar "El numero ingresado es incorrecto."
+
+    FinSi
+
+    Mostrar "Desea intentar de nuevo? 1=SI, 0=NO"
+    Pedir continuar
+
+  FinMientras
+Fin
