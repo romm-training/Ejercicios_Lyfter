@@ -1,0 +1,18 @@
+-------------------------
+. Este es el commit que incluye todos los entregables realizados hasta el momento. Se realizo siguiendo el ejercicio 1 en la rama past-exercises
+. Este commit se hizo despues de hacer las configuraciones de usuario y correo, las cuales no habia hecho en el primer commit.
+
+commit 017bf791b0bfc2c474a0ece8c8d6e87d8abd49e7 (HEAD -> past-exercises, origin/past-exercises)
+Author: rommtraining <rommtraining@gmail.com>
+Date:   Fri Apr 3 16:12:40 2026 -0600
+
+    Commit inicial de todos los ejercicios entregados en los primeros tres modulos
+
+-------------------------
+. Este es el primer commit que hice en la rama feature/initial creada siguiendo el texto de la leccion
+
+commit 4f5837a9875caa688c2cfca4689b0d8353219333 (origin/main, origin/HEAD, main, feature/initial)
+Author: romm-training <rommtraining@gmail.com>
+Date:   Fri Apr 3 14:41:51 2026 -0600
+
+    Initial commit
