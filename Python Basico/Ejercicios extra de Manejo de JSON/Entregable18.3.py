@@ -10,7 +10,7 @@ def read_json_file(file_path):
 
 def print_pokemons(pokemons):
     name_title = "Nombre"
-    attack_title = "Atqque"
+    attack_title = "Ataque"
     defense_title = "Defensa"
     speed_title = "Velocidad"
     name_col_len = 30

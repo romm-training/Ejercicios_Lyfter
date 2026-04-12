@@ -41,7 +41,7 @@ def pokemon_input():
     pokemon["base"]["Attack"] = integer_input("Base Ataque*: ")
     pokemon["base"]["Defense"] = integer_input("Base Defensa*: ")
     pokemon["base"]["Sp. Attack"] = integer_input("Base Ataque SP*: ")
-    pokemon["base"]["Sp. Defense"] = integer_input("Base Ataque SP*: ")
+    pokemon["base"]["Sp. Defense"] = integer_input("Base Defense SP*: ")
     pokemon["base"]["Speed"] = integer_input("Base Velocidad*: ")
 
     return pokemon
