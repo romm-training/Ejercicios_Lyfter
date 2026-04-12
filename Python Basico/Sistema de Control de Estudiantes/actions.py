@@ -6,19 +6,29 @@ _FLOW_CONTROL_INPUT_MESSAGE = "Presione 1 para ingresar la información de otro 
 _INVALID_OPTION_MESSAGE = "Opción invalida. Intente de nuevo."
 _INTEGER_NUMBER_MESSAGE = "Debe ingresar un número entero."
 _DECIMAL_NUMBER_MESSAGE = "Debe ingresar un número entero o decimal entre 0 y 100."
-_MINIMUM_GRADE_TO_APPROVE = 65
+_MINIMUM_GRADE_TO_APPROVE = 60
 _APPROVED_STATUS = "Aprobado"
 _FAILED_STATUS = "Reprobado"
-_COLUMN_SETTINGS = {
-        "Nombre Completo": 30,
-        "Sección": 10,
-        "Nota Español": 20 ,
-        "Nota Inglés": 20,
-        "Nota Est. Sociales": 20,
-        "Nota Ciencias": 20,
-        "Promedio": 15,
-        "Estado": 10
-    }
+_IDX_NAME = 0
+_IDX_CLASSROOM = 1
+_IDX_SPANISH = 2
+_IDX_ENGLISH = 3
+_IDX_SOCIAL_STUDIES = 4
+_IDX_SCIENCE = 5
+_IDX_AVERAGE = 6
+_IDX_STATUS = 7
+_IDX_TITLE = 0
+_IDX_LENGHT = 1
+_COLUMN_SETTINGS = [
+        ("Nombre Completo", 25),
+        ("Sección", 8),
+        ("Nota Español", 15),
+        ("Nota Inglés", 15),
+        ("Nota Sociales", 15),
+        ("Nota Ciencias", 15),
+        ("Promedio", 15),
+        ("Estado", 10)
+    ]
 _STUDENT_FIELDS = [
     "fullName",
     "classroom",
@@ -81,21 +91,48 @@ def _add_student_to_list(student):
 
 def _print_students(students):
 
-    for title, tit_len in _COLUMN_SETTINGS.items():
-        print(f"{title:<{tit_len}}",end="")
+    print("** Lista de Estudiantes **")
+
+    for title, tit_len in _COLUMN_SETTINGS:
+        print(f"{title:^{tit_len}}",end="")
     
     print("")
-    print("-" * 145)
+    print("-" * 118)
 
     for student in students:
-        print(f"{student[_STUDENT_FIELDS[0]]:<{_COLUMN_SETTINGS["Nombre Completo"]}}"
-              f"{student[_STUDENT_FIELDS[1]]:<{_COLUMN_SETTINGS["Sección"]}}"
-              f"{student[_STUDENT_FIELDS[2]]:<{_COLUMN_SETTINGS["Nota Español"]}}"
-              f"{student[_STUDENT_FIELDS[3]]:<{_COLUMN_SETTINGS["Nota Inglés"]}}"
-              f"{student[_STUDENT_FIELDS[4]]:<{_COLUMN_SETTINGS["Nota Est. Sociales"]}}"
-              f"{student[_STUDENT_FIELDS[5]]:<{_COLUMN_SETTINGS["Nota Ciencias"]}}"
-              f"{student[_STUDENT_FIELDS[6]]:<{_COLUMN_SETTINGS["Promedio"]}}"
-              f"{student[_STUDENT_FIELDS[7]]:<{_COLUMN_SETTINGS["Estado"]}}")
+        print(f"{student[_STUDENT_FIELDS[_IDX_NAME]]:<{_COLUMN_SETTINGS[_IDX_NAME][_IDX_LENGHT]}}"
+              f"{student[_STUDENT_FIELDS[_IDX_CLASSROOM]]:^{_COLUMN_SETTINGS[_IDX_CLASSROOM][_IDX_LENGHT]}}"
+              f"{student[_STUDENT_FIELDS[_IDX_SPANISH]]:^{_COLUMN_SETTINGS[_IDX_SPANISH][_IDX_LENGHT]}}"
+              f"{student[_STUDENT_FIELDS[_IDX_ENGLISH]]:^{_COLUMN_SETTINGS[_IDX_ENGLISH][_IDX_LENGHT]}}"
+              f"{student[_STUDENT_FIELDS[_IDX_SOCIAL_STUDIES]]:^{_COLUMN_SETTINGS[_IDX_SOCIAL_STUDIES][_IDX_LENGHT]}}"
+              f"{student[_STUDENT_FIELDS[_IDX_SCIENCE]]:^{_COLUMN_SETTINGS[_IDX_SCIENCE][_IDX_LENGHT]}}"
+              f"{student[_STUDENT_FIELDS[_IDX_AVERAGE]]:^{_COLUMN_SETTINGS[_IDX_AVERAGE][_IDX_LENGHT]}}"
+              f"{student[_STUDENT_FIELDS[_IDX_STATUS]]:^{_COLUMN_SETTINGS[_IDX_STATUS][_IDX_LENGHT]}}")
+
+    press_enter_key_to_return_to_main_menu()
+
+def _print_students_below_the_minimum_grade(students):
+
+    print("** Estudiantes Reprobados **")
+    print(f"{_COLUMN_SETTINGS[_IDX_NAME][_IDX_TITLE]:^{_COLUMN_SETTINGS[_IDX_NAME][_IDX_LENGHT]}}",end="")
+    print(f"{_COLUMN_SETTINGS[_IDX_CLASSROOM][_IDX_TITLE]:^{_COLUMN_SETTINGS[_IDX_CLASSROOM][_IDX_LENGHT]}}",end="")
+    print(f"{_COLUMN_SETTINGS[_IDX_SPANISH][_IDX_TITLE]:^{_COLUMN_SETTINGS[_IDX_SPANISH][_IDX_LENGHT]}}",end="")
+    print(f"{_COLUMN_SETTINGS[_IDX_ENGLISH][_IDX_TITLE]:^{_COLUMN_SETTINGS[_IDX_ENGLISH][_IDX_LENGHT]}}",end="")
+    print(f"{_COLUMN_SETTINGS[_IDX_SOCIAL_STUDIES][_IDX_TITLE]:^{_COLUMN_SETTINGS[_IDX_SOCIAL_STUDIES][_IDX_LENGHT]}}",end="")
+    print(f"{_COLUMN_SETTINGS[_IDX_SCIENCE][_IDX_TITLE]:^{_COLUMN_SETTINGS[_IDX_SCIENCE][_IDX_LENGHT]}}")
+    print("-" * 93)
+
+    for student in students:
+        print(f"{student[_STUDENT_FIELDS[_IDX_NAME]]:^{_COLUMN_SETTINGS[_IDX_NAME][_IDX_LENGHT]}}"
+              f"{student[_STUDENT_FIELDS[_IDX_CLASSROOM]]:^{_COLUMN_SETTINGS[_IDX_CLASSROOM][_IDX_LENGHT]}}",end="")
+        spanish_grade = str(student[_STUDENT_FIELDS[_IDX_SPANISH]]) if float(student[_STUDENT_FIELDS[_IDX_SPANISH]]) < _MINIMUM_GRADE_TO_APPROVE else "-"
+        print(f"{spanish_grade:^{_COLUMN_SETTINGS[_IDX_SPANISH][_IDX_LENGHT]}}",end="")
+        english_grade = str(student[_STUDENT_FIELDS[_IDX_ENGLISH]]) if float(student[_STUDENT_FIELDS[_IDX_ENGLISH]]) < _MINIMUM_GRADE_TO_APPROVE else "-"
+        print(f"{english_grade:^{_COLUMN_SETTINGS[_IDX_ENGLISH][_IDX_LENGHT]}}",end="")
+        social_studies_grade = str(student[_STUDENT_FIELDS[_IDX_SOCIAL_STUDIES]]) if float(student[_STUDENT_FIELDS[_IDX_SOCIAL_STUDIES]]) < _MINIMUM_GRADE_TO_APPROVE else "-"
+        print(f"{social_studies_grade:^{_COLUMN_SETTINGS[_IDX_SOCIAL_STUDIES][_IDX_LENGHT]}}",end="")
+        science_grade = student[_STUDENT_FIELDS[_IDX_SCIENCE]] if float(student[_STUDENT_FIELDS[_IDX_SCIENCE]]) < _MINIMUM_GRADE_TO_APPROVE else "-"
+        print(f"{science_grade:^{_COLUMN_SETTINGS[_IDX_SCIENCE][_IDX_LENGHT]}}")
 
     press_enter_key_to_return_to_main_menu()
 
@@ -111,17 +148,17 @@ def print_all_students():
     _print_students(_students)
 
 def get_overall_average():
-    overal_average = sum(float(e[_STUDENT_FIELDS[6]]) for e in _students) / len(_students)
+    overal_average = sum(float(e[_STUDENT_FIELDS[_IDX_AVERAGE]]) for e in _students) / len(_students)
     print(f"El promedio general es: {overal_average:.2f}") 
     press_enter_key_to_return_to_main_menu()
 
 def get_top3_students():
-    temp_students = sorted(_students.copy(), key=lambda x: x[_STUDENT_FIELDS[6]], reverse=True)[:3]
+    temp_students = sorted(_students.copy(), key=lambda x: x[_STUDENT_FIELDS[_IDX_AVERAGE]], reverse=True)[:3]
     _print_students(temp_students)
 
 def get_students_below_passing_grade():
-    temp_students = [e for e in _students if e[_STUDENT_FIELDS[7]] == _FAILED_STATUS]
-    _print_students(temp_students)
+    temp_students = [e for e in _students if e[_STUDENT_FIELDS[_IDX_STATUS]] == _FAILED_STATUS]
+    _print_students_below_the_minimum_grade(temp_students)
 
 def _get_student_status(spanish_grade, english_grade, social_studies_grade, science_grade):
     
@@ -140,24 +177,49 @@ def _get_student_average(spanish_grade, english_grade, social_studies_grade, sci
 def get_headers():
     return _STUDENT_FIELDS
 
+def delete_student():
+    fullName = string_fullname_input("Nombre completo: ")
+    classroom = string_grade_input("Sección: ")
+
+    confirmation = input(f"Confirma que desea eliminar la información de {fullName} de la sección {classroom}? 1=SI 0=NO: " )
+
+    if confirmation == 1:
+        for student in _students:
+            if student["fullName"] == fullName and student[classroom] == "classroom":
+                _students.remove(student)
+                break
+
+def enter_option_0_1(message):
+    while True:
+        try:
+            option = int(input(message))
+
+            if option not in (0,1):
+                raise ValueError()
+            break
+        except ValueError:
+            print_exception_message(f"{_INVALID_OPTION_MESSAGE}")
+    
+    return True, option
+
 def enter_students_information():
     flow_control = 1
     
     while flow_control == 1:
         student = {}
         print("Ingrese la Información de un Estudiante")
-        student[_STUDENT_FIELDS[0]] = string_fullname_input("Nombre completo: ")
-        student[_STUDENT_FIELDS[1]] = string_grade_input("Sección: ")
+        student[_STUDENT_FIELDS[_IDX_NAME]] = string_fullname_input("Nombre completo: ")
+        student[_STUDENT_FIELDS[_IDX_CLASSROOM]] = string_grade_input("Sección: ")
         spanish_grade = grade_input("Nota de Español: ")
-        student[_STUDENT_FIELDS[2]] = spanish_grade
+        student[_STUDENT_FIELDS[_IDX_SPANISH]] = spanish_grade
         english_grade = grade_input("Nota de Inglés: ")
-        student[_STUDENT_FIELDS[3]] = english_grade
+        student[_STUDENT_FIELDS[_IDX_ENGLISH]] = english_grade
         social_studies_grade = grade_input("Nota de Estudios Sociales: ")
-        student[_STUDENT_FIELDS[4]] = social_studies_grade
+        student[_STUDENT_FIELDS[_IDX_SOCIAL_STUDIES]] = social_studies_grade
         science_grade = grade_input("Nota de Ciencias: ")
-        student[_STUDENT_FIELDS[5]] = science_grade
-        student[_STUDENT_FIELDS[6]] = _get_student_average(spanish_grade, english_grade, social_studies_grade, science_grade)
-        student[_STUDENT_FIELDS[7]] = _get_student_status(spanish_grade, english_grade, social_studies_grade, science_grade)
+        student[_STUDENT_FIELDS[_IDX_SCIENCE]] = science_grade
+        student[_STUDENT_FIELDS[_IDX_AVERAGE]] = _get_student_average(spanish_grade, english_grade, social_studies_grade, science_grade)
+        student[_STUDENT_FIELDS[_IDX_STATUS]] = _get_student_status(spanish_grade, english_grade, social_studies_grade, science_grade)
 
         while True:
             try:

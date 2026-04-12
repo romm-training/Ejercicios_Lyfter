@@ -1,5 +1,5 @@
 from utils import clear_screen, print_exception_message
-from actions import enter_students_information, get_all_students, print_all_students, get_top3_students, get_overall_average, get_students_below_passing_grade, get_headers, set_students_from_list
+from actions import enter_students_information, get_all_students, print_all_students, get_top3_students, get_overall_average, get_students_below_passing_grade, get_headers, set_students_from_list, delete_student
 from data import write_csv_file, read_csv_file
 
 _MENU = {
@@ -50,6 +50,8 @@ def call_action(action):
             set_students_from_list(read_csv_file())
         case 7:
             get_students_below_passing_grade()
+        case 8:
+            delete_student()
 
 def main_menu():
     flow_control = 1
