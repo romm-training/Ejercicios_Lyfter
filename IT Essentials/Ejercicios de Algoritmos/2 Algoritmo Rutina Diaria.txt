@@ -1,0 +1,85 @@
+2. Cree un algoritmo que describa su rutina diaria. Use condiciones, condiciones multiples y ciclos.
+
+Proceso Principal
+. Inicio
+  . Repetir mientras siga vivo y tenga todas mis capacidades fisicas/mentales
+    . Me despierto
+    . Me levanto
+    . Ejecutar AcomodarCama
+    . Ejecutar Baño
+    . Ejecutar HoraDeComida
+    . Si es dia laboral
+      . Ejecutar RutinaDiaLaboral
+    . Si no es dia laboral
+      . Ejecutar RutinaDiaNoLaboral
+    . Preparar para dormir
+    . Dormir
+. Fin
+
+SubProceso AcomodarCama
+. Inicio
+  . Doblar cobija
+  . Tender sabanas
+  . Acomodar almohada
+. Fin
+
+SubProceso Baño
+. Inicio
+  . Preparar la ropa limpia que me voy a poner y el paño para secarme
+  . Entrar al cuarto de baño llevando la ropa limpia y el paño
+  . Colgar la ropa limpia y el paño en el espacio proviso
+  . Quitarme la ropa
+  . Entrar al baño
+  . Abrir el tubo
+  . Mojarme el pelo y cuerpo
+  . Cerrar el tubo
+  . Ponerme shampoo en el pelo
+  . Enjabonarme el cuerpo
+  . Abrir el tubo
+  . Quitarme el shampoo y jabon del pelo y cuerpo
+  . Cerrar el tubo
+  . Tomar el paño
+  . Repetir hasta que que este totalmente seco
+    . Secarme el pelo y cuerpo
+  . Salir del baño
+  . Ponerme la ropa limpia
+  . Salir del cuarto baño
+  . Colocar la ropa sucia y el paño en el recipiente de ropa para lavar
+. Fin
+
+SubProceso HoraDeComida
+. Inicio
+  . Preparar comida
+  . Comer
+  . Lavar utensilios
+. Fin
+
+SubProceso RutinaDiaLaboral
+. Inicio
+  . Si es teletrabajo
+    Ejecutar RutinaLaboral
+  . Si es presencial
+    . Viajar a la oficina
+    . Ejecutar Rutina Laboral
+    . Viajar de regreso a casa
+. Fin
+
+SubProceso RutinaLaboral
+. Inicio
+  . Antes de la hora de entrada, enciendo el computador
+  . Me autentico
+  . Trabajo
+  . Almuerzo
+  . Trabajo
+  . Apagar computador
+. Fin
+
+SubProceso RutinaDiaNoLaboral
+. Inicio
+  . Ejecutar HoraDeComida
+  . Ver redes sociales
+  . Hacer ejercicio
+  . Ejecutar HoraDeComida
+  . Actividades familiares
+  . Ejecutar HoraDeComida
+. Fin

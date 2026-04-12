@@ -1,0 +1,66 @@
+1 Algoritmo para ver un video en YouTube
+
+Proceso Principal
+. Inicio
+  . Si tiene un dispositivo
+    . Si el dispositivo esta encendido
+      . Si el usuario esta autenticado
+        . Si la conexion a internet esta habilitada
+          Ejecutar AbrirYouTube
+    . Si el dispositivo no esta encendido.
+      . Ejecutar SubProceso EncenderDispositivo
+  . Si no se tiene dispositivo
+    . Fin
+. Fin
+
+
+SubProceso EncenderDispositivo
+. Inicio
+  . Repetir mientras el usuario quiera reintentar el encendido
+    . Encender dispositivo.
+    . Si Encendido exitoso.
+      . Ejecutar AutenticarUsuario
+    . Si encendido no exitoso.
+      . Si el dispositivo tiene bateria
+        . Si la bateria no tiene suficiente carga
+          . Poner a cargar la bateria.
+      . Si no tiene bateria
+        . Si hay fluido electrico
+          . Revisar conexion de los cables del dispositivo al tomacorriente.
+        . Si no hay fluido electrico
+          . Esperar a que haya fluido electrico
+. Fin
+
+SubProceso AutenticarUsuario
+. Inicio
+  . Repetir mientras el usuario quiera reintentar la autenticacion o hasta que se acaben los reintentos
+    . Autenticar usuario en el dispositivo.
+      . Si autenticacion exitosa.
+        . Ejecutar HabilitarConexionAInternet
+      . Autenticacion no exitosa
+        . Continuar con el ciclo.
+. Fin
+
+SubProceso HabilitarConexionAInternet
+. Inicio
+  . Repetir mientras el usuario quiera reintentar la conexion
+    . Habilitar conexion a internet en el dispositivo.
+      . Si funciona conexion a internet.
+        . Ejecutar AbrirYouTube
+      . Si no funciona.
+        . Continuar con el ciclo.
+. Fin
+
+SubProceso AbrirYouTube
+. Inicio
+  . Si dispositivo es Celular o Televisor o Tablet.
+    . Si desea usar aplicacion YouTube.
+      . Abrir aplicacion Youtube.
+    . Si desea usar explorador de internet.
+      . Abrir el explorador de internet.
+      . Ingresar la direccion www.youtube.com en la barra de direcciones y presionar Enter.
+  . Si dispositivo es computadora de escritorio o portatil o servidor
+    . Abrir el explorador de internet.
+    . Ingresar la direccion www.youtube.com en la barra de direcciones y presionar Enter.
+  . Buscar video y presionar reproducir.
+Fin

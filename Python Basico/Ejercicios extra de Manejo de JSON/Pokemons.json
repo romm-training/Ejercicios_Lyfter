@@ -1,0 +1,89 @@
+[
+    {
+        "name": {
+            "english": "Pikachu"
+        },
+        "level": 25,
+        "type": [
+            "Electric"
+        ],
+        "base": {
+            "HP": 35,
+            "Attack": 55,
+            "Defense": 40,
+            "Sp. Attack": 50,
+            "Sp. Defense": 50,
+            "Speed": 90
+        }
+    },
+    {
+        "name": {
+            "english": "Charmander"
+        },
+        "level": 15,
+        "type": [
+            "Fire"
+        ],
+        "base": {
+            "HP": 39,
+            "Attack": 52,
+            "Defense": 43,
+            "Sp. Attack": 60,
+            "Sp. Defense": 50,
+            "Speed": 65
+        }
+    },
+    {
+        "name": {
+            "english": "Squirtle"
+        },
+        "level": 18,
+        "type": [
+            "Water"
+        ],
+        "base": {
+            "HP": 44,
+            "Attack": 48,
+            "Defense": 65,
+            "Sp. Attack": 50,
+            "Sp. Defense": 64,
+            "Speed": 43
+        }
+    },
+    {
+        "name": {
+            "english": "Pokemon1"
+        },
+        "type": [
+            "Water",
+            "Electric",
+            "Fire"
+        ],
+        "base": {
+            "HP": 55,
+            "Attack": 5,
+            "Defense": 5,
+            "Sp. Attack": 5,
+            "Sp. Defense": 5,
+            "Speed": 5
+        },
+        "level": 2
+    },
+    {
+        "name": {
+            "english": "Pokemon2"
+        },
+        "type": [
+            "Type1"
+        ],
+        "base": {
+            "HP": 75,
+            "Attack": 75,
+            "Defense": 75,
+            "Sp. Attack": 115,
+            "Sp. Defense": 115,
+            "Speed": 75
+        },
+        "level": 20
+    }
+]
