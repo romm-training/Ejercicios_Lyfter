@@ -36,33 +36,36 @@ def action_input():
 
     return action
 
-def call_action(action):
+def call_action(students, action):
     clear_screen()
     match action:
         case 1:
-            enter_students_information()
+            students = enter_students_information(students)
         case 2:
-            print_all_students()
+            print_all_students(students)
         case 3:
-            get_top3_students()
+            get_top3_students(students)
         case 4:
-            get_overall_average()
+            get_overall_average(students)
         case 5:
-            if is_students_list_empty():
+            if is_students_list_empty(students):
                 return
-            write_csv_file(get_all_students(), get_headers())
+            write_csv_file(students, get_headers())
         case 6:
-            if is_students_list_empty(False):
-                set_students_from_list(read_csv_file())
+            if is_students_list_empty(students, False):
+                students = set_students_from_list(students, read_csv_file())
             else:
                 print_exception_message("Atención: ya existen datos de estudiantes ingresados o cargados. No se puede cargar del archivo.", False)
                 press_enter_key_to_return_to_main_menu()
         case 7:
-            get_students_below_passing_grade()
+            get_students_below_passing_grade(students)
         case 8:
-            delete_student()
+            delete_student(students)
+
+    return students
 
 def main_menu():
+    students = []
     flow_control = 1
     while flow_control == 1:
         action = action_input()
@@ -70,7 +73,9 @@ def main_menu():
         if action == 0:
             flow_control = 0
         else:
-            call_action(action)
+            if students == None:
+                students = []
+            students = call_action(students, action)
 
     clear_screen()
     print("Saliendo del sistema...")

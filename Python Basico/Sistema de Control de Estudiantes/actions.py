@@ -1,7 +1,6 @@
 from utils import clear_screen, print_exception_message, press_enter_key_to_return_to_main_menu, print_success_message, press_enter_key_to_return_to_continue
 import re
 
-_students = []
 _FLOW_CONTROL_INPUT_MESSAGE = "Presione 1 para ingresar la información de otro estudiante o 0 para volver al Menú Principal: "
 _INVALID_OPTION_MESSAGE = "Opción invalida. Intente de nuevo."
 _INTEGER_NUMBER_MESSAGE = "Debe ingresar un número entero."
@@ -87,11 +86,13 @@ def string_classroom_input(label):
 
     return string_input
 
-def _add_student_to_list(student):
-    _students.append(student)
+def _add_student_to_list(students, student):
+    students.append(student)
+    return students
 
 def _print_students(students):
 
+    print("")
     print("** Lista de Estudiantes **")
     print("")
 
@@ -114,7 +115,7 @@ def _print_students(students):
     press_enter_key_to_return_to_main_menu()
 
 def _print_students_below_the_minimum_grade(students):
-    if is_students_list_empty():
+    if is_students_list_empty(students):
         return
     
     print("** Estudiantes Reprobados **")
@@ -141,40 +142,44 @@ def _print_students_below_the_minimum_grade(students):
 
     press_enter_key_to_return_to_main_menu()
 
-def get_all_students():
-    return _students
+def get_all_students(students):
+    return students
 
-def set_students_from_list(students_list):
+def set_students_from_list(students, students_list):
     if students_list == None:
         return
 
-    global _students 
-    _students = students_list.copy()
+    students = students_list.copy()
     print("")
+    return students
 
-def print_all_students():
-    if is_students_list_empty():
+def print_all_students(students):
+    if is_students_list_empty(students):
         return
-    _print_students(_students)
+    _print_students(students)
 
-def get_overall_average():
-    if is_students_list_empty():
+def get_overall_average(students):
+    if is_students_list_empty(students):
         return
     
-    overal_average = sum(float(e[_STUDENT_FIELDS[_IDX_AVERAGE]]) for e in _students) / len(_students)
+    overal_average = sum(float(e[_STUDENT_FIELDS[_IDX_AVERAGE]]) for e in students) / len(students)
     print(f"El promedio general es: {overal_average:.2f}") 
     press_enter_key_to_return_to_main_menu()
 
-def get_top3_students():
-    if is_students_list_empty():
+def get_top3_students(students):
+    if is_students_list_empty(students):
         return
-    temp_students = sorted(_students.copy(), key=lambda x: x[_STUDENT_FIELDS[_IDX_AVERAGE]], reverse=True)[:3]
+    temp_students = sorted(students.copy(), key=lambda x: x[_STUDENT_FIELDS[_IDX_AVERAGE]], reverse=True)[:3]
     _print_students(temp_students)
 
-def get_students_below_passing_grade():
-    if is_students_list_empty():
+def get_students_below_passing_grade(students):
+    if is_students_list_empty(students):
         return
-    temp_students = [e for e in _students if e[_STUDENT_FIELDS[_IDX_STATUS]] == _FAILED_STATUS]
+    temp_students = [e for e in students if e[_STUDENT_FIELDS[_IDX_STATUS]] == _FAILED_STATUS]
+    if len(temp_students) == 0:
+        print_exception_message("No hay estudiantes reprobados.")
+        press_enter_key_to_return_to_main_menu()
+        return
     _print_students_below_the_minimum_grade(temp_students)
 
 def _get_student_status(spanish_grade, english_grade, social_studies_grade, science_grade):
@@ -194,8 +199,8 @@ def _get_student_average(spanish_grade, english_grade, social_studies_grade, sci
 def get_headers():
     return _STUDENT_FIELDS
 
-def delete_student():
-    if is_students_list_empty():
+def delete_student(students):
+    if is_students_list_empty(students):
         return
 
     print("** Eliminar Información de un Estudiante **")
@@ -204,7 +209,7 @@ def delete_student():
     classroom = string_classroom_input("Sección: ")
     print("")
 
-    if not if_student_exists(fullName, classroom):
+    if not if_student_exists(students, fullName, classroom):
         print_exception_message(f"El estudiante no existe: {fullName}, sección {classroom}.", False)
         press_enter_key_to_return_to_main_menu()
         return
@@ -212,9 +217,9 @@ def delete_student():
     confirmation = enter_option_0_1(f"Confirma que desea eliminar la información de '{fullName}' de la sección '{classroom}'? 1=SI 0=NO: " )
 
     if confirmation == 1:
-        for student in _students:
+        for student in students:
             if student[_STUDENT_FIELDS[_IDX_NAME]] == fullName and student[_STUDENT_FIELDS[_IDX_CLASSROOM]] == classroom:
-                _students.remove(student)
+                students.remove(student)
                 print_success_message("Información eliminada correctamente.")
                 print("")
                 break
@@ -236,8 +241,8 @@ def enter_option_0_1(message):
     
     return option
 
-def is_students_list_empty(show_messages = True):
-    validation_result = len(_students) == 0
+def is_students_list_empty(students, show_messages = True):
+    validation_result = len(students) == 0
 
     if validation_result:
         if show_messages:
@@ -246,15 +251,15 @@ def is_students_list_empty(show_messages = True):
 
     return validation_result
 
-def if_student_exists(full_name, classroom):
+def if_student_exists(students, full_name, classroom):
     exists = any(
         e[_STUDENT_FIELDS[_IDX_NAME]] == full_name and 
         e[_STUDENT_FIELDS[_IDX_CLASSROOM]] == classroom 
-        for e in _students
+        for e in students
     )
     return exists
 
-def enter_students_information():
+def enter_students_information(students):
     flow_control = 1
     
     while flow_control == 1:
@@ -267,7 +272,7 @@ def enter_students_information():
         classroom = string_classroom_input("Sección: ")
         student[_STUDENT_FIELDS[_IDX_CLASSROOM]] = classroom
 
-        if if_student_exists(full_name, classroom):
+        if if_student_exists(students, full_name, classroom):
             print_exception_message(f"El estudiante '{full_name}' de la sección '{classroom}' ya existe.")
             press_enter_key_to_return_to_continue()
             continue
@@ -288,7 +293,7 @@ def enter_students_information():
             save_control = enter_option_0_1("Digite 1 para salvar o 0 para descartar: ")
 
             if save_control == 1:
-                _add_student_to_list(student)
+                _add_student_to_list(students, student)
                 print_success_message("Información guardada exitosamente.")
             else:
                 print_success_message("Información descartada.")
@@ -296,6 +301,8 @@ def enter_students_information():
         
         print("")
         flow_control = enter_option_0_1(_FLOW_CONTROL_INPUT_MESSAGE)
+    
+    return students
 
 
 
