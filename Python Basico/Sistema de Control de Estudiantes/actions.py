@@ -1,8 +1,7 @@
-from utils import clear_screen, print_exception_message, press_enter_key_to_return_to_main_menu, print_success_message, press_enter_key_to_return_to_continue
+from utils import clear_screen, print_exception_message, press_enter_key_to_return_to_main_menu, print_success_message, press_enter_key_to_return_to_continue, enter_option_0_1
 import re
 
 _FLOW_CONTROL_INPUT_MESSAGE = "Presione 1 para ingresar la información de otro estudiante o 0 para volver al Menú Principal: "
-_INVALID_OPTION_MESSAGE = "Opción invalida. Intente de nuevo."
 _INTEGER_NUMBER_MESSAGE = "Debe ingresar un número entero."
 _DECIMAL_NUMBER_MESSAGE = "Debe ingresar un número entero o decimal entre 0 y 100."
 _STUDENTS_LIST_EMPTY_MESSAGE = "La lista de estudiantes está vacía. Se debe ingresar información de estudiantes para ejecutar la acción seleccionada."
@@ -169,7 +168,7 @@ def get_overall_average(students):
 def get_top3_students(students):
     if is_students_list_empty(students):
         return
-    temp_students = sorted(students.copy(), key=lambda x: x[_STUDENT_FIELDS[_IDX_AVERAGE]], reverse=True)[:3]
+    temp_students = sorted(students.copy(), key=lambda x: float(x[_STUDENT_FIELDS[_IDX_AVERAGE]]), reverse=True)[:3]
     _print_students(temp_students)
 
 def get_students_below_passing_grade(students):
@@ -227,19 +226,6 @@ def delete_student(students):
         print("Eliminación cancelada por el usuario.")
 
     press_enter_key_to_return_to_main_menu()
-
-def enter_option_0_1(message):
-    while True:
-        try:
-            option = int(input(message))
-
-            if option not in (0,1):
-                raise ValueError()
-            break
-        except ValueError:
-            print_exception_message(f"{_INVALID_OPTION_MESSAGE} {message}")
-    
-    return option
 
 def is_students_list_empty(students, show_messages = True):
     validation_result = len(students) == 0

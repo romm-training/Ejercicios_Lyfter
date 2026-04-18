@@ -1,5 +1,5 @@
 import csv, os
-from utils import print_exception_message, press_enter_key_to_return_to_main_menu, print_success_message
+from utils import print_exception_message, press_enter_key_to_return_to_main_menu, print_success_message, enter_option_0_1
 
 _DEFAULT_ENCODING = "utf-8"
 _FILE_NAME = "students_grades.csv"
@@ -42,9 +42,11 @@ def write_csv_file(data, headers):
     file_path = _get_file_path()
 
     if _get_if_file_exists():
-        print_exception_message("El archivo ya existe. Proceso cancelado.")
-        press_enter_key_to_return_to_main_menu()
-        return
+        print_exception_message("Atención, el archivo ya existe.", False)
+        if enter_option_0_1("Desea sobreescribirlo? 1=SI 0=NO: ") == 0:
+            print_exception_message("Proceso de exportación cancelado.", False)
+            press_enter_key_to_return_to_main_menu()
+            return
 
     try:
         with open(file_path, "w", encoding=_DEFAULT_ENCODING, newline="") as file:
