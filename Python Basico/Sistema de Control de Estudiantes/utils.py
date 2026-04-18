@@ -19,3 +19,18 @@ def press_enter_key_to_return_to_main_menu():
 def press_enter_key_to_return_to_continue():
     print("")
     any_key = input("Presione Enter para continuar.")
+
+def enter_option_0_1(message):
+    INVALID_OPTION_MESSAGE = "Opción invalida. Intente de nuevo."
+
+    while True:
+        try:
+            option = int(input(message))
+
+            if option not in (0,1):
+                raise ValueError()
+            break
+        except ValueError:
+            print_exception_message(f"{INVALID_OPTION_MESSAGE} {message}")
+    
+    return option
