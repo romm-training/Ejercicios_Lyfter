@@ -1,4 +1,4 @@
-from utils import clear_screen, print_exception_message, press_enter_key_to_return_to_main_menu
+from utils import clear_screen, print_exception_message, press_enter_key_to_return_to_main_menu, enter_option_0_1
 from actions import enter_students_information, get_all_students, print_all_students, get_top3_students, get_overall_average, get_students_below_passing_grade, get_headers, set_students_from_list, delete_student, is_students_list_empty
 from data import write_csv_file, read_csv_file
 
@@ -50,13 +50,18 @@ def call_action(students, action):
         case 5:
             if is_students_list_empty(students):
                 return
-            write_csv_file(students, get_headers())
+            students_dict = [s.__dict__ for s in students]
+            write_csv_file(students_dict, get_headers())
         case 6:
             if is_students_list_empty(students, False):
                 students = set_students_from_list(students, read_csv_file())
             else:
-                print_exception_message("Atención: ya existen datos de estudiantes ingresados o cargados. No se puede cargar del archivo.", False)
-                press_enter_key_to_return_to_main_menu()
+                print_exception_message("Atención: ya existen datos de estudiantes ingresados o cargados.", False)
+                if enter_option_0_1("Desea reemplazarlos por los que se van a cargar desde el archivo? 1=SI 0=NO: ") == 0:
+                    print_exception_message("Proceso de carga cancelado.", False)
+                    press_enter_key_to_return_to_main_menu()
+                else:
+                    students = set_students_from_list(students, read_csv_file())
         case 7:
             get_students_below_passing_grade(students)
         case 8:

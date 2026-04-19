@@ -1,9 +1,7 @@
-from utils import clear_screen, print_exception_message, press_enter_key_to_return_to_main_menu, print_success_message, press_enter_key_to_return_to_continue
+from utils import clear_screen, print_exception_message, press_enter_key_to_return_to_main_menu, print_success_message, press_enter_key_to_return_to_continue, enter_option_0_1
 import re
 
 _FLOW_CONTROL_INPUT_MESSAGE = "Presione 1 para ingresar la información de otro estudiante o 0 para volver al Menú Principal: "
-_INVALID_OPTION_MESSAGE = "Opción invalida. Intente de nuevo."
-_INTEGER_NUMBER_MESSAGE = "Debe ingresar un número entero."
 _DECIMAL_NUMBER_MESSAGE = "Debe ingresar un número entero o decimal entre 0 y 100."
 _STUDENTS_LIST_EMPTY_MESSAGE = "La lista de estudiantes está vacía. Se debe ingresar información de estudiantes para ejecutar la acción seleccionada."
 _MINIMUM_GRADE_TO_APPROVE = 60
@@ -44,12 +42,12 @@ class Student:
     def __init__(self, full_name, classroom, spanish_grade, english_grade, social_studies_grade, science_grade):
         self.full_name = full_name
         self.classroom = classroom
-        self.spanish_grade = spanish_grade
-        self.english_grade = english_grade
-        self.social_studies_grade = social_studies_grade
-        self.science_grade = science_grade
-        self.average = _get_student_average(spanish_grade, english_grade, social_studies_grade, science_grade)
-        self.status = _get_student_status(spanish_grade, english_grade, social_studies_grade, science_grade)
+        self.spanish_grade = float(spanish_grade)
+        self.english_grade = float(english_grade)
+        self.social_studies_grade = float(social_studies_grade)
+        self.science_grade = float(science_grade)
+        self.average = _get_student_average(self.spanish_grade, self.english_grade, self.social_studies_grade, self.science_grade)
+        self.status = _get_student_status(self.spanish_grade, self.english_grade, self.social_studies_grade, self.science_grade)
 
 def grade_input(label):
     grade = 0
@@ -160,7 +158,15 @@ def set_students_from_list(students, students_list):
     if students_list == None:
         return
 
-    students = students_list.copy()
+    for student_row in students_list:
+        student = Student(student_row[_STUDENT_FIELDS[_IDX_NAME]],
+                          student_row[_STUDENT_FIELDS[_IDX_CLASSROOM]],
+                          student_row[_STUDENT_FIELDS[_IDX_SPANISH]],
+                          student_row[_STUDENT_FIELDS[_IDX_ENGLISH]],
+                          student_row[_STUDENT_FIELDS[_IDX_SOCIAL_STUDIES]],
+                          student_row[_STUDENT_FIELDS[_IDX_SCIENCE]])
+        students.append(student)
+
     print("")
     return students
 
@@ -239,19 +245,6 @@ def delete_student(students):
 
     press_enter_key_to_return_to_main_menu()
 
-def enter_option_0_1(message):
-    while True:
-        try:
-            option = int(input(message))
-
-            if option not in (0,1):
-                raise ValueError()
-            break
-        except ValueError:
-            print_exception_message(f"{_INVALID_OPTION_MESSAGE} {message}")
-    
-    return option
-
 def is_students_list_empty(students, show_messages = True):
     validation_result = len(students) == 0
 
@@ -275,13 +268,12 @@ def enter_students_information(students):
     
     while flow_control == 1:
         clear_screen()
-        student = {}
         print("** Información de un Estudiante **")
         print("")
         full_name = string_fullname_input("Nombre completo: ")
-        student.fullName = full_name
+        #student.full_name = full_name
         classroom = string_classroom_input("Sección: ")
-        student.classroom = classroom
+        #student.classroom = classroom
 
         if if_student_exists(students, full_name, classroom):
             print_exception_message(f"El estudiante '{full_name}' de la sección '{classroom}' ya existe.")
@@ -289,15 +281,16 @@ def enter_students_information(students):
             continue
 
         spanish_grade = grade_input("Nota de Español: ")
-        student.spanish_grade = spanish_grade
+        #student.spanish_grade = spanish_grade
         english_grade = grade_input("Nota de Inglés: ")
-        student.english_grade = english_grade
+        #student.english_grade = english_grade
         social_studies_grade = grade_input("Nota de Estudios Sociales: ")
-        student.social_studies_grade = social_studies_grade
+        #student.social_studies_grade = social_studies_grade
         science_grade = grade_input("Nota de Ciencias: ")
-        student.science_grade = science_grade
-        student.average = _get_student_average(spanish_grade, english_grade, social_studies_grade, science_grade)
-        student.status = _get_student_status(spanish_grade, english_grade, social_studies_grade, science_grade)
+        #student.science_grade = science_grade
+        #student.average = _get_student_average(spanish_grade, english_grade, social_studies_grade, science_grade)
+        #student.status = _get_student_status(spanish_grade, english_grade, social_studies_grade, science_grade)
+        student = Student(full_name, classroom, spanish_grade, english_grade, social_studies_grade, science_grade)
 
         while True:
             print("")
