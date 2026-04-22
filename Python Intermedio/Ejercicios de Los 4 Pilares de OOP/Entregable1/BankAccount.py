@@ -18,11 +18,13 @@ class SavingsAccount(BankAccount):
         self.min_balance = min_balance
 
     def withdraw(self, amount):
-        if (self.balance - amount) < self.min_balance:
-            print(f"No se puede retirar porque quedaría un saldo inferior al mínimo de {self.min_balance}")
-            return
+        try:
+            if (self.balance - amount) < self.min_balance:
+                raise ValueError(f"No se puede retirar porque quedaría un saldo inferior al mínimo de {self.min_balance}")
 
-        super().withdraw(amount)
+            super().withdraw(amount)
+        except ValueError as e:
+            print(e)
 
 class main():
     savings_account = SavingsAccount(100)
