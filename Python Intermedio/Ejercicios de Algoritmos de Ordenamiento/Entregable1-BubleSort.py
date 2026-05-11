@@ -1,10 +1,13 @@
 def order_array(parray):
     for i in range(0, len(parray)-1):
+        smaller = i
         for j in range(i+1, len(parray)):
-            if parray[i] > parray[j]:
-                temp = parray[i]
-                parray[i] = parray[j]
-                parray[j] = temp
+            if parray[j] < parray[smaller]:
+                smaller = j
+        temp = parray[i]
+        parray[i] = parray[smaller]
+        parray[smaller] = temp
+        #print(f"i={i} j={j} -> {parray}")
     return parray
 
 def print_array(array_to_print):
