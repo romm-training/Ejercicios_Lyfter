@@ -29,7 +29,7 @@ def read_data():
 
         return data
 
-def append_data(data: category_dto.Category_Dto):
+def add_data(data: category_dto.Category_Dto):
     file_path = _get_data_file_path()
 
     file_exists = _get_if_file_exists(file_path)

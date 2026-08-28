@@ -44,7 +44,7 @@ def write_data(data):
         writer.writeheader()
         writer.writerows(data.to_dict())
         
-def append_data(data):
+def add_data(data):
     file_path = _get_data_file_path()
 
     file_exists = _get_if_file_exists(file_path)
