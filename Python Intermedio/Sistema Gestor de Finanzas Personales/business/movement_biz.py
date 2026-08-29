@@ -42,8 +42,9 @@ class Movement_Biz():
         return bool(amount_pattern.match(str(amount).strip()))
 
     # Lista la condicion y mensaje de las reglas de validacion y retorna las que se cumplen.
-    def movement_validations(self, values) -> list:
-        categories = category_biz.Category_Biz().read_data()
+    def movement_validations(self, values, categories = []) -> list:
+        if categories == []:
+            categories = category_biz.Category_Biz().read_data()
         category_names = {c.name for c in categories}
 
         rules = [

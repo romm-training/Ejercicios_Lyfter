@@ -4,8 +4,17 @@ from unittest import TestCase
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
 
 from business.movement_biz import Movement_Biz
+from dto.category_dto import Category_Dto
 
 class Test_Movement_Biz(TestCase):
+    categories_test_data = [
+        Category_Dto("Ingreso","Salario","#AEC6CF"),
+        Category_Dto("Gasto","Comida","#FFD1DC"),
+        Category_Dto("Gasto","Transporte","#77DD77"),
+        Category_Dto("Gasto","Alquiler","#FFDAB9"),
+        Category_Dto("Gasto","Medicos","#D2B48C")
+    ]
+
     def test_is_valid_amount_integer(self):
         result = Movement_Biz().is_valid_amount(15)
         self.assertEqual(result, True)
@@ -39,7 +48,7 @@ class Test_Movement_Biz(TestCase):
             "movement_amount": 15
         }
 
-        result = Movement_Biz().movement_validations(values)
+        result = Movement_Biz().movement_validations(values, self.categories_test_data)
         self.assertEqual(result, [])
 
     def test_movement_validations_future_date(self):
@@ -51,7 +60,7 @@ class Test_Movement_Biz(TestCase):
             "movement_amount": 15
         }
 
-        result = Movement_Biz().movement_validations(values)
+        result = Movement_Biz().movement_validations(values, self.categories_test_data)
         self.assertEqual(result, ["La fecha del movimiento no puede ser una fecha futura."])
 
     def test_movement_validations_type_do_not_exist(self):
@@ -63,7 +72,7 @@ class Test_Movement_Biz(TestCase):
             "movement_amount": 15
         }
 
-        result = Movement_Biz().movement_validations(values)
+        result = Movement_Biz().movement_validations(values, self.categories_test_data)
         self.assertEqual(result, ["El tipo de movimiento es inválido."])
 
     def test_movement_validations_category_default_value(self):
@@ -75,7 +84,7 @@ class Test_Movement_Biz(TestCase):
             "movement_amount": 15
         }
 
-        result = Movement_Biz().movement_validations(values)
+        result = Movement_Biz().movement_validations(values, self.categories_test_data)
         self.assertEqual(result, ['Debe seleccionar una categoría.', 'Debe seleccionar una categoría válida.'])
 
     def test_movement_validations_category_does_not_exist(self):
@@ -87,7 +96,7 @@ class Test_Movement_Biz(TestCase):
             "movement_amount": 15
         }
 
-        result = Movement_Biz().movement_validations(values)
+        result = Movement_Biz().movement_validations(values, self.categories_test_data)
         self.assertEqual(result, ["Debe seleccionar una categoría válida."])
 
     def test_movement_validations_no_description(self):
@@ -99,7 +108,7 @@ class Test_Movement_Biz(TestCase):
             "movement_amount": 15
         }
 
-        result = Movement_Biz().movement_validations(values)
+        result = Movement_Biz().movement_validations(values, self.categories_test_data)
         self.assertEqual(result, ["Debe ingresar una descripción."])
 
     def test_movement_validations_amount_zero(self):
@@ -111,7 +120,7 @@ class Test_Movement_Biz(TestCase):
             "movement_amount": 0
         }
 
-        result = Movement_Biz().movement_validations(values)
+        result = Movement_Biz().movement_validations(values, self.categories_test_data)
         self.assertEqual(result, [])
 
     def test_movement_validations_amount_negative(self):
@@ -123,7 +132,7 @@ class Test_Movement_Biz(TestCase):
             "movement_amount": -15
         }
 
-        result = Movement_Biz().movement_validations(values)
+        result = Movement_Biz().movement_validations(values, self.categories_test_data)
         self.assertEqual(result, [])
 
     def test_movement_validations_amount_string(self):
@@ -135,7 +144,7 @@ class Test_Movement_Biz(TestCase):
             "movement_amount": ""
         }
 
-        result = Movement_Biz().movement_validations(values)
+        result = Movement_Biz().movement_validations(values, self.categories_test_data)
         self.assertEqual(result, ["Debe ingresar un monto valido."])
 
 if __name__ == "__main__":

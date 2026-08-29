@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
 
 from business.category_biz import Category_Biz
 
-class Test_User_Interface(TestCase):
+class Test_Category_Biz(TestCase):
     
     def test_category_validations(self):
         values = {
