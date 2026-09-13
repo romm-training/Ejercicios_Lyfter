@@ -231,6 +231,10 @@ DummyJSON
 
 Ver documentación en este archivo [DummyJSON_API_Documentation](resources/DummyJSON_API_Documentation.md)
 
+### 4.5 Reflexión final
+
+Me ha parecido un contenido muy valioso para enriquecer de forma integral el conocimiento de un desarrollador.
+
 **¿Qué aprendiste del proceso?**
 
 El uso de parámetros de query para seleccionar los campos que se requiere retornar. Me parece muy útil para reducir el tamaño de la respuesta en aquellos casos que lo ameriten, por ejemplo, para cargar combos.
@@ -239,6 +243,6 @@ También aprendí que hay muchos APIs públicos y gratuitos que se pueden utiliz
 
 Conocer la diferencia entre frontend y backend, la interacción entre ambos y la cantidad y complejidad de los componentes que permiten que ambos se comuniquen de forma segura.
 
-### 4.5 Reflexión final
+**¿Cómo te ayudó Postman a entender la comunicación entre cliente y servidor?**
 
-Me ha parecido un contenido muy valioso para enriquecer de forma integral el conocimiento de un desarrollador.
+Postman hace muy fácil la configuración para consumo de APIs mediante su interfaz visual. De no contar con una herramienta así, todo habría que hacerlo programado mediante terminal o algún lenguaje de programación, lo que es mas difícil. Por otra parte, aunque yo no lo usé en este proyecto, Postman permite crear ambientes para ejecutar el mismo request apuntando a varios servidores sin cambiar código, solo el valor de las variables, lo que es especialmente útil para autenticación, manejo de diferentes IPs o DNS y datos de prueba.
