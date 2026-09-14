@@ -29,7 +29,7 @@ CREATE TABLE `ProductsPerInvoice`(
 );
 CREATE TABLE `ShoppingCart`(
     `Id` CHAR(36) NOT NULL,
-    `BuyerEmail` VARCHAR(255) NOT NULL,
+    `UserId` BIGINT NOT NULL,
     `TotalAmount` DECIMAL(8, 2) NOT NULL,
     PRIMARY KEY(`Id`)
 );
@@ -72,6 +72,8 @@ ALTER TABLE
     `ShoppingCartProducts` ADD CONSTRAINT `shoppingcartproducts_shoppingcartid_foreign` FOREIGN KEY(`ShoppingCartId`) REFERENCES `ShoppingCart`(`Id`);
 ALTER TABLE
     `Invoices` ADD CONSTRAINT `invoices_paymentmethodid_foreign` FOREIGN KEY(`PaymentMethodId`) REFERENCES `PaymentMethods`(`id`);
+ALTER TABLE
+    `ShoppingCart` ADD CONSTRAINT `shoppingcart_userid_foreign` FOREIGN KEY(`UserId`) REFERENCES `Users`(`id`);
 ALTER TABLE
     `ProductsPerInvoice` ADD CONSTRAINT `productsperinvoice_productid_foreign` FOREIGN KEY(`ProductId`) REFERENCES `Products`(`Id`);
 ALTER TABLE
