@@ -1,6 +1,6 @@
 CREATE TABLE PaymentMethods (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
     MethodType TEXT NOT NULL,
-    BankName TEXT,
+    BankName TEXT
 );
 

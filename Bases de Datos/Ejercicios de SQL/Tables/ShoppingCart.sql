@@ -1,8 +1,6 @@
 CREATE TABLE ShoppingCart (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
     UserId INTEGER NOT NULL,
-    ProductId INTEGER NOT NULL,
-    Quantity INTEGER NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES Users(Id),
-    FOREIGN KEY (ProductId) REFERENCES Products(Id)
+    TotalAmount INTEGER NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(Id)
 );
