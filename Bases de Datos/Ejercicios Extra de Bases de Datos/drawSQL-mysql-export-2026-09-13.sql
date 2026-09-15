@@ -61,7 +61,7 @@ CREATE TABLE `ProductReviews`(
 CREATE TABLE `PaymentMethods`(
     `id` CHAR(36) NOT NULL,
     `Type` VARCHAR(255) NOT NULL,
-    `BankName` BIGINT NULL,
+    `BankName` VARCHAR(255) NULL,
     PRIMARY KEY(`id`)
 );
 ALTER TABLE
