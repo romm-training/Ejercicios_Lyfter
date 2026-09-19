@@ -1,0 +1,10 @@
+CREATE TABLE ProductsPerInvoice (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    InvoiceId INTEGER NOT NULL,
+    ProductId INTEGER NOT NULL,
+    Quantity INTEGER NOT NULL,
+    TotalAmount REAL NOT NULL,
+    FOREIGN KEY (InvoiceId) REFERENCES INVOICES(Id),
+    FOREIGN KEY (ProductId) REFERENCES Products(Id)
+);
+
