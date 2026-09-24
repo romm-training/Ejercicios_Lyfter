@@ -58,11 +58,11 @@ Asegúrese de incluir en la solución todos los pasos y justificaciones sobre la
 
 
 #### Tabla Model
-| Id | MakeId | Name | YearId | ColorId |
-|-|-|-|-|-|
-| 1 | 1 | Accord | 1 | 1 |
-| 2 | 1 | CR-V | 2 | 2 |
-| 3 | 2 | Volt | 3 | 3 |
+| Id | MakeId | Name | YearId |
+|-|-|-|-|
+| 1 | 1 | Accord | 1 |
+| 2 | 1 | CR-V | 2 |
+| 3 | 2 | Volt | 3 |
 
 #### Tabla InsuranceCompanyPolicy
 | Id | InsuranceCompanyId | InsurancePolicyId |
@@ -73,12 +73,19 @@ Asegúrese de incluir en la solución todos los pasos y justificaciones sobre la
 | 4 | 4 | 4 |
 
 #### Tabla Car
-| Id | VIN | MakeId | ModelId | OwnerI |
+| Id | VIN | MakeId | ModelId | ColorId |
 |-|-|-|-|-|
 | 1 | 1HGCM82633A | 1 | 1 | 1 |
-| 2 | 1HGCM82633A | 1 | 1 | 2 |
-| 3 | 5J6RM4H79EL | 1 | 2 | 3 |
-| 4 | 1G1RA6EH1FU | 2 | 3 | 4 |
+| 2 | 5J6RM4H79EL | 1 | 2 | 2 |
+| 3 | 1G1RA6EH1FU | 2 | 3 | 3 |
+
+#### Tabla CarOwner
+| Id | CarId | OwnerId |
+|-|-|-|
+| 1 | 1 | 1 |
+| 1 | 1 | 2 |
+| 2 | 2 | 3 |
+| 3 | 3 | 4 |
 
 #### Tabla CarInsurance
 | Id | CarId | InsuranceCompanyPolicyId |
@@ -87,7 +94,6 @@ Asegúrese de incluir en la solución todos los pasos y justificaciones sobre la
 | 2 | 2 | 2 |
 | 3 | 3 | 3 |
 | 4 | 4 | 4 |
-
 
 ## Explicación
 
@@ -103,7 +109,7 @@ Las tablas `Make`, `Year`, `Color`, `Owner`, `InsuranceCompany` e `InsurancePoli
 
 ### Tablas Catálogo Compuestos
 
-Las tablas `Model`, `InsuranceCompanyPolicy`, `Car` y `CarInsurance` se consideran compuestas porque tienen una o varias relaciones de dependencia con otras tablas.
+Las tablas `Model`, `InsuranceCompanyPolicy`, `Car`, `CarOwner` y `CarInsurance` se consideran compuestas porque tienen una o varias relaciones de dependencia con otras tablas.
 
 Las tablas `InsuranceCompanyPolicy` tiene como objetivo relacionar las compañías con las pólizas para luego asociarlas con los carros mediante un único campo.
 
@@ -122,3 +128,4 @@ A pesar de que no se creó ninguna tabla con llaves compuestas, si se cumple con
 ### 3FN
 
 Todos los campos, especialmente nombres, fueron organizados de forma que pueden ser identificados por un Id.
+Se hizo la separacion de la relación de Car y Owner para que puedan existir dos o más dueños para el mismo carro.
