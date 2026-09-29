@@ -19,7 +19,7 @@ def get_task(task_id):
         return None, f"La tarea con el id {task_id} no existe", 404
     return task, None, 200
 
-def validate_task_data(data):
+def validate_task_data_for_creating(data):
     if not data.get("id"):
         return "El id es requerido"
     if not isinstance(data.get("id"),int):
@@ -35,9 +35,21 @@ def validate_task_data(data):
 
     return None
 
+def validate_task_data_for_updating(data):
+    if not data.get("title"):
+        return "El titulo es requerido"
+    if not data.get("description"):
+        return "La descripcion es requerida"
+    if not data.get("status"):
+        return "El estado es requerido"
+    if data.get("status") not in _VALID_STATUSES:
+        return "Estado invalido"
+
+    return None
+
 def create_task(data):
     # Validaciones de datos
-    error = validate_task_data(data)
+    error = validate_task_data_for_creating(data)
     if error is not None:
         return None, error, 400
 
@@ -64,6 +76,11 @@ def create_task(data):
     return new_task, None, 201
 
 def update_task(task_id, data):
+    # Validaciones de datos
+    error = validate_task_data_for_updating(data)
+    if error is not None:
+        return None, error, 400
+    
     tasks = read_tasks()
     task = _get_task(tasks, task_id)
     if task is None:
