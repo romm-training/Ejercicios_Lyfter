@@ -9,10 +9,12 @@ DO $$
 
 DECLARE 
     v_billid INT; -- Guarda el identificador de la tabla bill.
-    v_bill_number INT := 1004; -- El número de la factura a insertar. Valor 1000.
+    v_bill_number INT := 1005; -- El número de la factura a insertar. Valor 1000.
     v_userId INT := 3; --  el identificador del usuario.
-    v_stock INT; -- Almacena el stock del producto.
-    v_price NUMERIC(18,2); -- Almacena el precio del producto.
+    v_stock INT := 0; -- Almacena el stock del producto.
+    v_price NUMERIC(18,2) := 0; -- Almacena el precio del producto.
+    v_subtotal NUMERIC(18,2) := 0; -- Almacena el subtotal y, en este caso, es el mismo total de la linea.
+    v_total NUMERIC(18,2) := 0; -- Acumula el total de los detalles para actualizar el total de la factura.
     rec RECORD; -- Almacena los datos que se van a insertar en la tabla detalle.
 BEGIN
     PERFORM set_config('search_path', 'Ejercicio1', True); -- Cambia el esquema de búsqueda a Ejercicio1.
@@ -35,7 +37,7 @@ BEGIN
 
     -- Insertar en Bill
     INSERT INTO "Ejercicio1"."Bill" (number, date, "userId", "totalAmount", status)
-    VALUES (v_bill_number, now(), v_userId, 500.00, 'Creada')
+    VALUES (v_bill_number, now(), v_userId, 0.00, 'Creada')
     RETURNING id INTO v_billid; -- Obtener el id generado para la factura.
 
 	RAISE NOTICE 'Antes insertar BillDetail';
@@ -64,9 +66,13 @@ BEGIN
             RAISE EXCEPTION 'El producto con id % no tiene suficiente stock.', rec.productId;
         END IF;
 
+        v_subtotal = v_price * rec.quantity;
+
         -- Insertar en BillDetail
         INSERT INTO "Ejercicio1"."BillDetail" ("productId", quantity, price, subtotal, total, "billId")
-        VALUES (rec.productId, rec.quantity, v_price, v_price * rec.quantity, v_price * rec.quantity, v_billid);
+        VALUES (rec.productId, rec.quantity, v_price, v_subtotal, v_subtotal, v_billid);
+
+        v_total = v_total + v_subtotal;
 
         -- Rebajar el stock del producto
         UPDATE "Ejercicio1"."Products"
@@ -74,12 +80,16 @@ BEGIN
         WHERE id = rec.productId;
     END LOOP;
 
+    -- Actualiza el total de factura en la tabla Bill
+    UPDATE "Ejercicio1"."Bill"
+    SET "totalAmount" = v_total
+    WHERE id = v_billid;
+
 	RAISE NOTICE 'Transacción completada exitosamente. Factura insertada con id: %', v_billid;
 
 EXCEPTION 
     WHEN OTHERS THEN
         RAISE NOTICE 'Error: %', SQLERRM; -- Mostrar el mensaje de error.
-        ROLLBACK; -- Deshacer la transacción en caso de error.
 
 END
 

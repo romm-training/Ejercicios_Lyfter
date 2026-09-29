@@ -9,7 +9,6 @@ DO $$
 DECLARE 
 	v_billid INT; -- Identificador de la factura.
     v_bill_number INT := 1004; -- El número de la factura a insertar.
-    v_userId INT := 3; --  el identificador del usuario.
     rec RECORD; -- Almacena los datos que se van a insertar en la tabla detalle.
 BEGIN
     PERFORM set_config('search_path', 'Ejercicio1', True); -- Cambia el esquema de búsqueda a Ejercicio1.
@@ -45,7 +44,6 @@ BEGIN
 EXCEPTION 
     WHEN OTHERS THEN
         RAISE NOTICE 'Error: %', SQLERRM; -- Mostrar el mensaje de error.
-        ROLLBACK; -- Deshacer la transacción en caso de error.
 
 END
 
