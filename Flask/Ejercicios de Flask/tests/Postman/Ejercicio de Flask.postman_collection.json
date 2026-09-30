@@ -172,6 +172,36 @@
           "response": []
         },
         {
+          "name": "Crear Tareas - id vacio",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": \"\",\r\n    \"title\": \"Ejercicio de Flask\",\r\n    \"description\": \"Prueba ejercicio de Flask\",\r\n    \"status\": \"Por Hacer\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/tasks",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "tasks"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Crear Tareas - Sin title",
           "request": {
             "method": "POST",
@@ -179,6 +209,96 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"id\": 1,\r\n    \"description\": \"Prueba ejercicio de Flask\",\r\n    \"status\": \"Por Hacer\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/tasks",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "tasks"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Tareas - title vacio",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": 1,\r\n    \"title\": \"\",\r\n    \"description\": \"Prueba ejercicio de Flask\",\r\n    \"status\": \"Por Hacer\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/tasks",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "tasks"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Tareas - Sin description",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": 1,\r\n    \"title\": \"Ejercicio de Flask\",\r\n    \"status\": \"Por Hacer\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/tasks",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "tasks"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Tareas - description vacio",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": 1,\r\n    \"title\": \"Ejercicio de Flask\",\r\n    \"description\": \"\",\r\n    \"status\": \"Por Hacer\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -232,13 +352,13 @@
           "response": []
         },
         {
-          "name": "Crear Tareas - Sin description",
+          "name": "Crear Tareas - status vacio",
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"id\": 1,\r\n    \"title\": \"Ejercicio de Flask\",\r\n    \"status\": \"Por Hacer\"\r\n}",
+              "raw": "{\r\n    \"id\": 1,\r\n    \"title\": \"Ejercicio de Flask\",\r\n    \"description\": \"Prueba ejercicio de Flask\",\r\n    \"status\": \"\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -428,6 +548,37 @@
           "response": []
         },
         {
+          "name": "Actualizar Tarea - title vacio",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"\",\r\n    \"description\": \"Prueba ejercicio de Flask\",\r\n    \"status\": \"Completada\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/tasks/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "tasks",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Actualizar Tarea - Sin description",
           "request": {
             "method": "PUT",
@@ -435,6 +586,37 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"title\": \"Ejercicio de Flask\",\r\n    \"status\": \"Completada\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/tasks/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "tasks",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Tarea - description vacia",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Ejercicio de Flask\",\r\n    \"description\": \"\",\r\n    \"status\": \"Completada\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -490,13 +672,44 @@
           "response": []
         },
         {
-          "name": "Actualizar Tarea - Estado invalido",
+          "name": "Actualizar Tarea - status invalido",
           "request": {
             "method": "PUT",
             "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"title\": \"Ejercicio de Flask\",\r\n    \"description\": \"Prueba ejercicio de Flask\",\r\n    \"status\": \"Prueba\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/tasks/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "tasks",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Tarea - status vacio",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Ejercicio de Flask\",\r\n    \"description\": \"Prueba ejercicio de Flask\",\r\n    \"status\": \"\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
