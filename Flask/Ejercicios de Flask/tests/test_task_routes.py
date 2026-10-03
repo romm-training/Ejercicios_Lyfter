@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from app import app
 
-tasks = [
+base_tasks = [
   {
     "id": 1,
     "title": "Ejercicio de Flask 1",
@@ -20,8 +20,23 @@ tasks = [
     "id": 3,
     "title": "Ejercicio de Flask 3",
     "description": "Prueba ejercicio de Flask 3",
-    "status": "Por Hacer"
+    "status": "Completado"
   }
+]
+
+filtered_tasks = [
+    {
+        "description": "Prueba ejercicio de Flask 1",
+        "id": 1,
+        "status": "Por Hacer",
+        "title": "Ejercicio de Flask 1"
+    },
+    {
+        "description": "Prueba ejercicio de Flask 2",
+        "id": 2,
+        "status": "Por Hacer",
+        "title": "Ejercicio de Flask 2"
+    }
 ]
 
 @pytest.fixture
@@ -30,12 +45,20 @@ def client():
     return app.test_client()
 
 # GET /api/v1/tasks
-def test_get_tasks_exitoso(client):
-    with patch("services.task_service.get_tasks", return_value=(tasks, None, 200)):
+def test_get_tasks_successful(client):
+    with patch("services.task_service.get_tasks", return_value=(base_tasks, None, 200)):
         response = client.get("/api/v1/tasks")
 
     assert response.status_code == 200
-    assert response.get_json() == tasks
+    assert response.get_json() == base_tasks
+
+# GET /api/v1/tasks
+def test_get_tasks_valid_status(client):
+    with patch("services.task_service.get_tasks", return_value=(filtered_tasks, None, 200)):
+        response = client.get("/api/v1/tasks?status=Por Hacer")
+
+    assert response.status_code == 200
+    assert response.get_json() == filtered_tasks
 
 # Get /api/v1/tasks/<id>
 def test_get_task_existente(client):

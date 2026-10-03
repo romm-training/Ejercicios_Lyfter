@@ -14,7 +14,7 @@ class _FIELD_KEYS():
     TASK_STATUS = "status"
 
     def __setattr__(self, name, value):
-        raise AttributeError(f"No se puede modificar la constante '{name}'")
+        raise AttributeError(f"No se puede modificar la constante '{name}'.")
 
 def _get_task(tasks, task_id):
     for task in tasks:
@@ -29,7 +29,7 @@ def _get_tasks_from_repository() -> tuple[list,str,int]:
     try:
         tasks = read_tasks()
     except RepositoryError:
-        return [], "No se pudo leer las tareas", HTTP_CODES.R500
+        return [], "No se pudo leer las tareas.", HTTP_CODES.R500
 
     return tasks, None, HTTP_CODES.R200
 
@@ -38,19 +38,29 @@ def _get_tasks_from_repository() -> tuple[list,str,int]:
 def _get_if_task_exists(tasks, task_id) -> tuple[any,str,int]:
     task = _get_task(tasks, task_id)
     if task is None:
-        return None, f"La tarea con id {task_id} no existe", HTTP_CODES.E404
-    return task, f"La tarea con id {task_id} ya existe", HTTP_CODES.R200
+        return None, f"La tarea con id {task_id} no existe.", HTTP_CODES.E404
+    return task, f"La tarea con id {task_id} ya existe.", HTTP_CODES.R200
 
 def _write_tasks_into_repository(tasks) -> tuple[str,int]:
     try:
         write_tasks(tasks)
     except RepositoryError:
-        return "No se pudo guardar las tareas", HTTP_CODES.E500
+        return "No se pudo guardar las tareas.", HTTP_CODES.E500
 
     return "Tareas guardadas exitosamente.", HTTP_CODES.R200 
 
-def get_tasks():
-    return _get_tasks_from_repository()
+def get_tasks(status):
+    tasks, message, code = _get_tasks_from_repository()
+    if code >= HTTP_CODES.E300:
+        return None, message, code
+    
+    if status is not None:
+        if _is_valid_status(status):
+            filtered_tasks = [task for task in tasks if task[_FIELD_KEYS.TASK_STATUS] == status]
+            return filtered_tasks, None, HTTP_CODES.R200
+        else:
+            return None, "Estado inválido.", HTTP_CODES.E400
+    return tasks, message, code
 
 def get_task(task_id):
     tasks, message, code = _get_tasks_from_repository()
@@ -64,15 +74,15 @@ def _task_id_required(data):
 
 def _task_id_is_integer(data):
     if not isinstance(data.get(_FIELD_KEYS.TASK_ID),int):
-        return "El id debe ser un numero entero."
+        return "El id debe ser un número entero."
     return None
 
 def _task_title_required(data):
     if not data.get(_FIELD_KEYS.TASK_TITLE):
-        return "El titulo es requerido."
+        return "El título es requerido."
     else:
         if data[_FIELD_KEYS.TASK_TITLE] == "":
-            return "El titulo no puede ser vacío."
+            return "El título no puede ser vacío."
     return None
 
 def _task_description_required(data):
@@ -83,11 +93,14 @@ def _task_description_required(data):
             return "La descripción no puede ser vacía."
     return None
 
+def _is_valid_status(status) -> bool:
+    return status in _VALID_STATUSES
+
 def _task_status_required_and_valid(data):
     if not data.get(_FIELD_KEYS.TASK_STATUS):
-        return "El estado es requerido"
-    if data.get(_FIELD_KEYS.TASK_STATUS) not in _VALID_STATUSES:
-        return "Estado invalido"
+        return "El estado es requerido."
+    if not _is_valid_status(data.get(_FIELD_KEYS.TASK_STATUS)):
+        return "Estado inválido."
     return None
 
 def _prepare_validation_messages(messages):
@@ -144,7 +157,10 @@ def create_task(data):
     tasks.append(new_task)
 
     message, code = _write_tasks_into_repository(tasks)
-    return new_task, message, code
+    if code >= HTTP_CODES.E300:
+        return None, message, code
+    
+    return new_task, message, HTTP_CODES.R201
 
 def update_task(task_id, data):
     # Validaciones de datos
@@ -166,7 +182,6 @@ def update_task(task_id, data):
 
     message, code = _write_tasks_into_repository(tasks)
     return task, message, code
-
 
 def delete_task(task_id):
     tasks, message, code = _get_tasks_from_repository()

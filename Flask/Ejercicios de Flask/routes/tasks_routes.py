@@ -9,11 +9,12 @@ _URL_PREFIX = "/api/v1/tasks"
 def register_task_routes(app: Flask) -> None:
 
     def _is_error_response_code(code) -> bool:
-        return code != HTTP_CODES.R200
+        return code >= HTTP_CODES.E300
 
     @app.route(_URL_PREFIX, methods=['GET'])
     def get_tasks():
-        tasks, message, code = task_service.get_tasks()
+        status_filter = request.args.get("status")
+        tasks, message, code = task_service.get_tasks(status_filter)
         if _is_error_response_code(code):
             return jsonify({"error": message}), code
         return jsonify(tasks), code
