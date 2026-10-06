@@ -29,7 +29,7 @@ def _get_tasks_from_repository() -> tuple[list,str,int]:
     try:
         tasks = read_tasks()
     except RepositoryError:
-        return [], "No se pudo leer las tareas.", HTTP_CODES.R500
+        return [], "No se pudo leer las tareas.", HTTP_CODES.E500
 
     return tasks, None, HTTP_CODES.R200
 
@@ -64,6 +64,8 @@ def get_tasks(status):
 
 def get_task(task_id):
     tasks, message, code = _get_tasks_from_repository()
+    if code >= HTTP_CODES.E300:
+        return None, message, code
     
     return _get_if_task_exists(tasks, task_id)
 
@@ -135,7 +137,7 @@ def create_task(data):
         return None, error, HTTP_CODES.E400
 
     tasks, message, code = _get_tasks_from_repository()
-    if code != HTTP_CODES.R200:
+    if code >= HTTP_CODES.E300:
         return tasks, message, code
 
     # Valida si el id ya existe
@@ -169,7 +171,7 @@ def update_task(task_id, data):
         return None, error, HTTP_CODES.E400
     
     tasks, message, code = _get_tasks_from_repository()
-    if code != HTTP_CODES.R200:
+    if code >= HTTP_CODES.E300:
         return tasks, message, code
 
     task, message, code = _get_if_task_exists(tasks, task_id)
@@ -185,7 +187,7 @@ def update_task(task_id, data):
 
 def delete_task(task_id):
     tasks, message, code = _get_tasks_from_repository()
-    if code != HTTP_CODES.R200:
+    if code >= HTTP_CODES.E300:
         return tasks, message, code
     
     task, message, code = _get_if_task_exists(tasks, task_id)
@@ -195,7 +197,7 @@ def delete_task(task_id):
     tasks.remove(task)
 
     message, code = _write_tasks_into_repository(tasks)
-    if code != HTTP_CODES.R200:
+    if code >= HTTP_CODES.E300:
         return None, message, code
 
     return None, "Tarea eliminada exitosamente.", HTTP_CODES.R204

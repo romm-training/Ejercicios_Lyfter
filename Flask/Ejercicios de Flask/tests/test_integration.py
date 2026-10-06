@@ -434,7 +434,7 @@ def test_update_task_empty_status(client, tasks_file):
     assert response.status_code == 400, response.get_json()
     assert json.dumps(response.get_json(), sort_keys=True) == json.dumps(expected_response, sort_keys=True)
 
-def test_update_task_empty_status(client, tasks_file):
+def test_update_task_invalid_status(client, tasks_file):
     task_to_update = {
         "description": "Prueba ejercicio de Flask 11",
         "status": "Prueba",
@@ -459,7 +459,7 @@ def test_delete_task_successful(client, tasks_file):
     response = client.get(f"{_BASE_URI}/1")
     assert response.status_code == 404
 
-def test_update_task_no_existing_id(client, tasks_file):
+def test_delete_task_no_existing_id(client, tasks_file):
     expected_response = {
         "error": "La tarea con id 99 no existe."
     }

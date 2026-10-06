@@ -1,11 +1,5 @@
 [
   {
-    "id": 1,
-    "title": "Ejercicio de Flask",
-    "description": "Prueba ejercicio de Flask",
-    "status": "Por Hacer"
-  },
-  {
     "id": 2,
     "title": "Ejercicio de Flask",
     "description": "Prueba ejercicio de Flask",
@@ -16,5 +10,11 @@
     "title": "Ejercicio de Flask",
     "description": "Prueba ejercicio de Flask",
     "status": "Por Hacer"
+  },
+  {
+    "id": 1,
+    "title": "Ejercicio de Flask",
+    "description": "Prueba ejercicio de Flask",
+    "status": "Completada"
   }
 ]

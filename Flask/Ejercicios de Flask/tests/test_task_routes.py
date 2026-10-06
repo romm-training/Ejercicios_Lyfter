@@ -61,7 +61,7 @@ def test_get_tasks_valid_status(client):
     assert response.get_json() == filtered_tasks
 
 # Get /api/v1/tasks/<id>
-def test_get_task_existente(client):
+def test_get_existing_task(client):
     task = {
         "id": 1,
         "title": "Ejercicio de Flask 1",
@@ -75,7 +75,7 @@ def test_get_task_existente(client):
         assert response.status_code == 200
         assert response.get_json() == task
 
-def test_get_task_no_existente(client):
+def test_get_no_existing_task(client):
     with patch("services.task_service.get_task", return_value=(None, "Tarea no encontrada", 404)):
         response = client.get("/api/v1/tasks/99")
 
@@ -83,7 +83,7 @@ def test_get_task_no_existente(client):
         assert response.get_json() == {"error": "Tarea no encontrada"}
 
 # POST /api/v1/tasks
-def test_create_task_exitoso(client):
+def test_create_task_successful(client):
     payload = {
         "id": 1,
         "title": "Ejercicio de Flask 1",
@@ -98,7 +98,7 @@ def test_create_task_exitoso(client):
     assert response.get_json() == payload
     mock_create.assert_called_once_with(payload)
 
-def test_create_task_error_validacion(client):
+def test_create_task_validation_error(client):
     with patch("services.task_service.create_task", 
                return_value=(None, "Estado invalido", 400)):
         response = client.post("/api/v1/tasks", json={"title":"A"}) 
