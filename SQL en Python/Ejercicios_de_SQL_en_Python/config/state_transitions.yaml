@@ -1,0 +1,6 @@
+user:
+  transitions:
+    - from: active
+      to: inactive
+      guards: [is_inactive_user, has_no_active_rentals]
+      action: deactivate_car
