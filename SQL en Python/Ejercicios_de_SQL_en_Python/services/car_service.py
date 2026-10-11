@@ -1,6 +1,7 @@
 class CarService():
-    def __init__(self, car_repository):
+    def __init__(self, car_repository, state_machine):
         self.car_repository = car_repository
+        self.state_machine = state_machine
 
     def get_all_cars(self):
         try:
@@ -18,14 +19,15 @@ class CarService():
 
     def create_car(self, car_data):
         try:
-            self.car_repository.create(car_data)
+            #self.car_repository.create(car_data)
+            return self.state_machine.create("car", car_data)
         except Exception as e:
             print("Error in CarService.create_car: ", e)
             raise
 
     def update_car(self, car_id, car_data):
         try:
-            self.car_repository.update(car_id, car_data)
+            return self.state_machine.update(car_id, car_data)
         except Exception as e:
             print("Error in CarService.update_car: ", e)
             raise
@@ -33,6 +35,7 @@ class CarService():
     def delete_car(self, car_id):
         try:
             self.car_repository.delete(car_id)
+            return True
         except Exception as e:
             print("Error in CarService.delete_car: ", e)
             raise

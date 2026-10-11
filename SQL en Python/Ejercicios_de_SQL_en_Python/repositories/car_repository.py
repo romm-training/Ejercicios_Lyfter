@@ -1,3 +1,5 @@
+from exceptions import NotFoundError
+
 class CarRepository():
     def __init__(self, db_manager):
         self.db_manager = db_manager
@@ -11,77 +13,70 @@ class CarRepository():
             "status": car_record[4]
         }
 
+    def _first_or_raise(self, results, rental_id):
+        if not results:
+            raise NotFoundError(f"Registro {rental_id} no encontrado.")
+        return self._format_record(results[0])
+
+    def _first_or_none(self, results):
+        if not results:
+            return None
+        return self._format_record(results[0])
+
+    def _all_or_raise(self, results):
+        if not results:
+            raise NotFoundError(f"No se han encontrado registros.")
+        formatted_results = [self._format_record(result) for result in results]
+        return formatted_results
+
     def get_all(self):
-        try:
-            results = self.db_manager.execute_query(
-                "SELECT id, make, model, year, status " \
-                "FROM lyfter_car_rental.car;"
-            )
-            formatted_results = [self._format_record(result) for result in results]
-            print("Consulta exitosa.")
-            return formatted_results
-        except Exception as e:
-            print("Error al obtener registros de la base de datos: ", e)
-            raise
+        results = self.db_manager.execute_query(
+            "SELECT id, make, model, year, status " \
+            "FROM lyfter_car_rental.car;"
+        )
+        return self._all_or_raise(results)
 
     def get_by_id(self, car_id):
-        try:
-            results = self.db_manager.execute_query(
-                "SELECT id, make, model, year, status " \
-                "FROM lyfter_car_rental.car " \
-                "WHERE id = %s;",
-                (car_id,)
-            )
-            formatted_results = self._format_record(results[0])
-            print("Consulta exitosa.")
-            return formatted_results
-        except Exception as e:
-            print("Error al obtener registro por ID de la base de datos: ", e)
-            raise
+        results = self.db_manager.execute_query(
+            "SELECT id, make, model, year, status " \
+            "FROM lyfter_car_rental.car " \
+            "WHERE id = %s;",
+            (car_id,)
+        )
+        return self._first_or_raise(results, car_id)
 
     def create(self, car_data):
-        try:
-            self.db_manager.execute_query(
-                "INSERT INTO lyfter_car_rental.car (make, model, year, status) " \
-                "VALUES (%s, %s, %s, %s);",
-                (
-                    car_data["make"],
-                    car_data["model"],
-                    car_data["year"],
-                    car_data["status"]
-                )
+        results = self.db_manager.execute_query(
+            "INSERT INTO lyfter_car_rental.car (make, model, year, status) " \
+            "VALUES (%s, %s, %s, %s)" \
+            "RETURNING *;",
+            (
+                car_data["make"],
+                car_data["model"],
+                car_data["year"],
+                car_data["status"]
             )
-            print("Creación exitosa.")
-        except Exception as e:
-            print("Error al crear registro en la base de datos: ", e)
-            raise
+        )
+        return self._first_or_none(results)
 
     def update(self, car_id, car_data):
-        try:
-            self.db_manager.execute_query(
-                "UPDATE lyfter_car_rental.car " \
-                "SET make = %s, model = %s, year = %s, status = %s WHERE id = %s;",
-                (
-                    car_data["make"],
-                    car_data["model"],
-                    car_data["year"],
-                    car_data["status"],
-                    car_id
-                )
+        results = self.db_manager.execute_query(
+            "UPDATE lyfter_car_rental.car " \
+            "SET make = %s, model = %s, year = %s, status = %s WHERE id = %s" \
+            "RETURNING *;",
+            (
+                car_data["make"],
+                car_data["model"],
+                car_data["year"],
+                car_data["status"],
+                car_id
             )
-            print("Actualización exitosa.")
-        except Exception as e:
-            print("Error al actualizar registro en la base de datos: ", e)
-            raise
+        )
+        return self._first_or_none(results)
 
     def delete(self, car_id):
-        try:
-            self.db_manager.execute_query(
-                "DELETE FROM lyfter_car_rental.car " \
-                "WHERE id = %s;",
-                (car_id,)
-            )
-            print("Eliminación exitosa.")
-        except Exception as e:
-            print("Error al eliminar registro de la base de datos: ", e)
-            raise
+        self.db_manager.execute_query(
+            "DELETE FROM lyfter_car_rental.car " \
+            "WHERE id = %s;",
+            (car_id,)
+        )

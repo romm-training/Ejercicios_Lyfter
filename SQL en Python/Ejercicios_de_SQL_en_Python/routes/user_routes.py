@@ -19,7 +19,7 @@ def register_user_routes(app: Flask, user_service) -> None:
             if user:
                 return jsonify(user), 200
             else:
-                return jsonify({"error": "User not found"}), 404
+                return jsonify({"error": "Usuario no encontrado."}), 404
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -27,8 +27,11 @@ def register_user_routes(app: Flask, user_service) -> None:
     def create_user():
         try:
             user_data = request.json
-            user_service.create_user(user_data)
-            return jsonify({"message": "User created successfully"}), 201
+            created_user = user_service.create_user(user_data)
+            if created_user:
+                return jsonify(created_user), 201
+            else:
+                return jsonify({"message": "Error al crear el usuario"}), 500
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -38,9 +41,9 @@ def register_user_routes(app: Flask, user_service) -> None:
             user_data = request.json
             updated = user_service.update_user(user_id, user_data)
             if updated:
-                return jsonify({"message": "User updated successfully"}), 200
+                return jsonify(updated), 200
             else:
-                return jsonify({"error": "User not found"}), 404
+                return jsonify({"error": "Error al actualizar el usuario."}), 404
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -49,8 +52,8 @@ def register_user_routes(app: Flask, user_service) -> None:
         try:
             deleted = user_service.delete_user(user_id)
             if deleted:
-                return jsonify({"message": "User deleted successfully"}), 200
+                return jsonify({"message": "Usuario eliminado exitosamente."}), 200
             else:
-                return jsonify({"error": "User not found"}), 404
+                return jsonify({"error": "Usuario no encontrado"}), 404
         except Exception as e:
             return jsonify({"error": str(e)}), 500

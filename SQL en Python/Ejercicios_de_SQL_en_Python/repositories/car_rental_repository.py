@@ -1,3 +1,5 @@
+from exceptions import NotFoundError
+
 class CarRentalRepository():
     def __init__(self, db_manager):
         self.db_manager = db_manager
@@ -12,79 +14,94 @@ class CarRentalRepository():
             "status": car_rental_record[5]
         }
 
+    def _first_or_raise(self, results, rental_id):
+        if not results:
+            raise NotFoundError(f"Registro {rental_id} no encontrado.")
+        return self._format_record(results[0])
+
+    def _first_or_none(self, results):
+        if not results:
+            return None
+        return self._format_record(results[0])
+
+    def _all_or_raise(self, results):
+        if not results:
+            raise NotFoundError(f"No se han encontrado registros.")
+        formatted_results = [self._format_record(result) for result in results]
+        return formatted_results
+
     def get_all(self):
-        try:
-            results = self.db_manager.execute_query(
-                "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
-                "FROM lyfter_car_rental.car_rental;"
-            )
-            formatted_results = [self._format_record(result) for result in results]
-            print("Retrieved all car rentals from database.")
-            return formatted_results
-        except Exception as e:
-            print("Error getting all car rentals from database: ", e)
-            raise
+        results = self.db_manager.execute_query(
+            "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
+            "FROM lyfter_car_rental.car_rental;"
+        )
+        print("Retornar todas las rentas.")
+        return self._all_or_raise(results)
 
     def get_by_id(self, rental_id):
-        try:
-            results = self.db_manager.execute_query(
-                "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
-                "FROM lyfter_car_rental.car_rental " \
-                "WHERE id = %s;",
-                (rental_id,)
-            )
-            formatted_results = self._format_record(results[0])
-            print("Retrieved car rental by ID from database.")
-            return formatted_results
-        except Exception as e:
-            print("Error getting car rental by ID from database: ", e)
-            raise
+        results = self.db_manager.execute_query(
+            "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
+            "FROM lyfter_car_rental.car_rental " \
+            "WHERE id = %s;",
+            (rental_id,)
+        )
+        print("Retornar renta por id.")
+        return self._first_or_raise(results)
+
+    def get_by_id_for_update(self, rental_id):
+        results = self.db_manager.execute_query(
+            "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
+            "FROM lyfter_car_rental.car_rental " \
+            "WHERE id = %s" \
+            "FOR UPDATE;",
+            (rental_id,)
+        )
+        return self._first_or_raise(results)
+
+    def get_by_user_id_and_rental_status(self, user_id, status):
+        results = self.db_manager.execute_query(
+            "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
+            "FROM lyfter_car_rental.car_rental " \
+            "WHERE user_id = %s AND status = %s" \
+            "FOR UPDATE;",
+            (user_id, status)
+        )
+        return self._all_or_raise(results)
 
     def create(self, rental_data):
-        try:
-            self.db_manager.execute_query(
-                "INSERT INTO lyfter_car_rental.car_rental (user_id, car_id, rental_date_at, return_date_at, status) " \
-                "VALUES (%s, %s, %s, %s, %s);",
-                (
-                    rental_data["user_id"],
-                    rental_data["car_id"],
-                    rental_data["rental_date_at"],
-                    rental_data["return_date_at"],
-                    rental_data["status"]
-                )
+        results = self.db_manager.execute_query(
+            "INSERT INTO lyfter_car_rental.car_rental (user_id, car_id, rental_date_at, return_date_at, status) " \
+            "VALUES (%s, %s, %s, %s, %s)" \
+            "RETURNING *;",
+            (
+                rental_data["user_id"],
+                rental_data["car_id"],
+                rental_data["rental_date_at"],
+                rental_data["return_date_at"],
+                rental_data["status"]
             )
-            print("Car rental created in database.")
-        except Exception as e:
-            print("Error creating car rental in database: ", e)
-            raise
+        )
+        return self._first_or_none(results)
 
     def update(self, rental_id, rental_data):
-        try:
-            self.db_manager.execute_query(
-                "UPDATE lyfter_car_rental.car_rental " \
-                "SET user_id = %s, car_id = %s, rental_date_at = %s, return_date_at = %s, status = %s WHERE id = %s;",
-                (
-                    rental_data["user_id"],
-                    rental_data["car_id"],
-                    rental_data["rental_date_at"],
-                    rental_data["return_date_at"],
-                    rental_data["status"],
-                    rental_id
-                )
+        results = self.db_manager.execute_query(
+            "UPDATE lyfter_car_rental.car_rental " \
+            "SET user_id = %s, car_id = %s, rental_date_at = %s, return_date_at = %s, status = %s WHERE id = %s;",
+            (
+                rental_data["user_id"],
+                rental_data["car_id"],
+                rental_data["rental_date_at"],
+                rental_data["return_date_at"],
+                rental_data["status"],
+                rental_id
             )
-            print("Car rental updated in database.")
-        except Exception as e:
-            print("Error updating car rental in database: ", e)
-            raise
+        )
+        return self._first_or_none(results)
 
     def delete(self, rental_id):
-        try:
-            self.db_manager.execute_query(
-                "DELETE FROM lyfter_car_rental.car_rental " \
-                "WHERE id = %s;",
-                (rental_id,)
-            )
-            print("Car rental deleted from database.")
-        except Exception as e:
-            print("Error deleting car rental from database: ", e)
-            raise
+        self.db_manager.execute_query(
+            "DELETE FROM lyfter_car_rental.car_rental " \
+            "WHERE id = %s;",
+            (rental_id,)
+        )
+        print("Car rental deleted from database.")

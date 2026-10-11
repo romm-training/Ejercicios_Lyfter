@@ -19,7 +19,7 @@ def register_car_routes(app: Flask, car_service) -> None:
             if car:
                 return jsonify(car), 200
             else:
-                return jsonify({"error": "Car not found"}), 404
+                return jsonify({"error": "Carro no encontrado."}), 404
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -27,8 +27,11 @@ def register_car_routes(app: Flask, car_service) -> None:
     def create_car():
         try:
             car_data = request.json
-            car_service.create_car(car_data)
-            return jsonify({"message": "Car created successfully"}), 201
+            new_car = car_service.create_car(car_data)
+            if new_car:
+                return jsonify(new_car), 201
+            else:
+                return jsonify({"error":"Error al crear el carro."}), 500 
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -38,9 +41,9 @@ def register_car_routes(app: Flask, car_service) -> None:
             car_data = request.json
             updated = car_service.update_car(car_id, car_data)
             if updated:
-                return jsonify({"message": "Car updated successfully"}), 200
+                return jsonify(updated), 200
             else:
-                return jsonify({"error": "Car not found"}), 404
+                return jsonify({"error": "Error al actualizar el carro."}), 500
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -49,8 +52,8 @@ def register_car_routes(app: Flask, car_service) -> None:
         try:
             deleted = car_service.delete_car(car_id)
             if deleted:
-                return jsonify({"message": "Car deleted successfully"}), 200
+                return jsonify({"message": "Carro eliminado correctamente."}), 200
             else:
-                return jsonify({"error": "Car not found"}), 404
+                return jsonify({"error": "Carro no encontrado."}), 404
         except Exception as e:
             return jsonify({"error": str(e)}), 500

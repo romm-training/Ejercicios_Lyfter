@@ -1,6 +1,7 @@
 class CarRentalService():
-    def __init__(self, car_rental_repository):
+    def __init__(self, car_rental_repository, state_machine):
         self.car_rental_repository = car_rental_repository
+        self.state_machine = state_machine
 
     def get_all_rentals(self):
         try:
@@ -18,14 +19,15 @@ class CarRentalService():
 
     def create_rental(self, rental_data):
         try:
-            self.car_rental_repository.create(rental_data)
+            #self.car_rental_repository.create(rental_data)
+            return self.state_machine.create("car_rental", rental_data)
         except Exception as e:
             print("Error in CarRentalService.create_rental: ", e)
             raise
 
     def update_rental(self, rental_id, rental_data):
         try:
-            self.car_rental_repository.update(rental_id, rental_data)
+            return self.state_machine.update(rental_id, rental_data)
         except Exception as e:
             print("Error in CarRentalService.update_rental: ", e)
             raise
@@ -33,6 +35,7 @@ class CarRentalService():
     def delete_rental(self, rental_id):
         try:
             self.car_rental_repository.delete(rental_id)
+            return True
         except Exception as e:
             print("Error in CarRentalService.delete_rental: ", e)
             raise
