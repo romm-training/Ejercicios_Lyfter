@@ -37,9 +37,9 @@ user_repository = UserRepository(db_manager)
 car_repository = CarRepository(db_manager)
 car_rental_repository = CarRentalRepository(db_manager)
 
-user_service = UserService(user_repository, state_machine)
-car_service = CarService(car_repository, state_machine)
-car_rental_service = CarRentalService(car_rental_repository, state_machine)
+user_service = UserService(user_repository, state_machine, db_manager)
+car_service = CarService(car_repository, state_machine, db_manager)
+car_rental_service = CarRentalService(car_rental_repository, state_machine, db_manager)
 
 register_user_routes(app, user_service)
 register_car_routes(app, car_service)

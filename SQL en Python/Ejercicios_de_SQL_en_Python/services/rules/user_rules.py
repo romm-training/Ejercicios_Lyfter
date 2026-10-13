@@ -2,23 +2,29 @@ from services.state_machine import guard, effect
 from services.enums.statuses import UserStatus
 from exceptions import BusinessRuleError 
 
+def _user_id_helper(ctx):
+    if ctx.entity == "user":
+        return ctx.record["id"]
+    source = ctx.record or ctx.data
+    return source["user_id"]
+
 @guard("user_is_active")
 def user_is_active(ctx):
-    user_id = ctx.record["user_id"] if ctx.record else ctx.data["user_id"]
+    user_id = _user_id_helper(ctx) #ctx.record["id"] if ctx.record else ctx.data["id"]
     user = ctx.repos["user"].get_by_id_for_update(user_id)
     if user["account_status"] != UserStatus.ACTIVE:
         raise BusinessRuleError(f"El usuario {user['id']} no está activo.")
 
 @guard("user_is_inactive")
 def user_is_inactive(ctx):
-    user_id = ctx.record["user_id"] if ctx.record else ctx.data["user_id"]
+    user_id = _user_id_helper(ctx) #ctx.record["id"] if ctx.record else ctx.data["id"]
     user = ctx.repos["user"].get_by_id_for_update(user_id)
     if user["account_status"] != UserStatus.INACTIVE:
         raise BusinessRuleError(f"El usuario {user['id']} no está inactivo.")
 
 @guard("user_is_delinquent")
-def user_is_active(ctx):
-    user_id = ctx.record["user_id"] if ctx.record else ctx.data["user_id"]
+def user_is_delinquent(ctx):
+    user_id = _user_id_helper(ctx) #ctx.record["id"] if ctx.record else ctx.data["id"]
     user = ctx.repos["user"].get_by_id_for_update(user_id)
     if user["account_status"] != UserStatus.DELINQUENT:
         raise BusinessRuleError(f"El usuario {user['id']} no está moroso.")
@@ -34,20 +40,20 @@ def username_and_email_no_exist(ctx):
 @effect("user_to_active")
 def user_to_active(ctx):
     ctx.repos["user"].update_status(
-        ctx.current_record["user_id"], 
-        UserStatus.INACTIVE
+        ctx.current_record["id"], 
+        UserStatus.ACTIVE
     )
 
 @effect("user_to_inactive")
 def user_to_inactive(ctx):
     ctx.repos["user"].update_status(
-        ctx.current_record["user_id"], 
+        ctx.current_record["id"], 
         UserStatus.INACTIVE
     )
 
 @effect("user_to_delinquent")
 def user_to_delinquent(ctx):
     ctx.repos["user"].update_status(
-        ctx.current_record["user_id"], 
+        ctx.current_record["id"], 
         UserStatus.DELINQUENT
     )

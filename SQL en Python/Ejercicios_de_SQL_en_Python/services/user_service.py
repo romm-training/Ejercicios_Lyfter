@@ -1,41 +1,26 @@
 class UserService():
-    def __init__(self, user_repository, state_machine):
+    def __init__(self, user_repository, state_machine, db_manager):
         self.user_repository = user_repository
         self.state_machine = state_machine
+        self.db_manager = db_manager
 
     def get_all_users(self):
-        try:
-            return self.user_repository.get_all()
-        except Exception as e:
-            print("Error al obtener todos los usuarios: ", e)
-            raise
+        return self.user_repository.get_all()
 
     def get_user_by_id(self, user_id):
-        try:
-            return self.user_repository.get_by_id(user_id)
-        except Exception as e:
-            print("Error al obtener usuario por Id: ", e)
-            raise
+        return self.user_repository.get_by_id(user_id)
 
     def create_user(self, user_data):
-        try:
-            #self.user_repository.create(user_data)
-            return self.state_machine.create("user", user_data)
-        except Exception as e:
-            print("Error al crear usuario: ", e)
-            raise
+        return self.state_machine.create("user", user_data)
 
     def update_user(self, user_id, user_data):
-        try:
-            return self.state_machine.update(user_id, user_data)
-        except Exception as e:
-            print("Error al actualizar usuario: ", e)
-            raise
+        new_status = user_data.pop("account_status", None)
+        with self.db_manager.transaction():
+            car = self.user_repository.get_by_id_for_update(user_id)
+            if new_status and new_status != car["account_status"]:
+                self.state_machine.change_status("user", user_id, new_status)
+            return self.user_repository.update(user_id, user_data)
 
     def delete_user(self, user_id):
-        try:
-            self.user_repository.delete(user_id)
-            return True
-        except Exception as e:
-            print("Error al eliminar usuario: ", e)
-            raise
+        self.user_repository.delete(user_id)
+        return True

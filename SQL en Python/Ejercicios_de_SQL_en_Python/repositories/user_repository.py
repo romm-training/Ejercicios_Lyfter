@@ -31,6 +31,12 @@ class UserRepository:
         formatted_results = [self._format_record(result) for result in results]
         return formatted_results
 
+    def _all_or_none(self, results):
+        if not results:
+            return None
+        formatted_results = [self._format_record(result) for result in results]
+        return formatted_results
+
     def get_all(self):
         results = self.db_manager.execute_query(
             "SELECT id, name, email, username, birthdate_at, account_status " \
@@ -86,7 +92,7 @@ class UserRepository:
     def update(self, user_id, user_data):
         results = self.db_manager.execute_query(
             "UPDATE lyfter_car_rental.user " \
-            "SET name = %s, email = %s, username = %s, password = %s, birthdate_at = %s, account_status = %s " \
+            "SET name = %s, email = %s, username = %s, password = %s, birthdate_at = %s " \
             "WHERE id = %s" \
             "RETURNING id, name, email, username, birthdate_at, account_status;",
             (
@@ -95,7 +101,19 @@ class UserRepository:
                 user_data["username"],
                 user_data["password"],
                 user_data["birthdate_at"],
-                user_data["account_status"],
+                user_id
+            )
+        )
+        return self._first_or_none(results)
+
+    def update_status(self, user_id, target_status):
+        results = self.db_manager.execute_query(
+            "UPDATE lyfter_car_rental.user " \
+            "SET account_status = %s " \
+            "WHERE id = %s" \
+            "RETURNING id, name, email, username, birthdate_at, account_status;",
+            (
+                target_status,
                 user_id
             )
         )

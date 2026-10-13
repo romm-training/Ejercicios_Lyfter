@@ -7,8 +7,8 @@ class CarRentalRepository():
     def _format_record(self, car_rental_record):
         return {
             "id": car_rental_record[0],
-            "user_id": car_rental_record[1],
-            "car_id": car_rental_record[2],
+            "car_id": car_rental_record[1],
+            "user_id": car_rental_record[2],
             "rental_date_at": car_rental_record[3],
             "return_date_at": car_rental_record[4],
             "status": car_rental_record[5]
@@ -30,6 +30,12 @@ class CarRentalRepository():
         formatted_results = [self._format_record(result) for result in results]
         return formatted_results
 
+    def _all_or_none(self, results):
+        if not results:
+            return None
+        formatted_results = [self._format_record(result) for result in results]
+        return formatted_results
+
     def get_all(self):
         results = self.db_manager.execute_query(
             "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
@@ -46,7 +52,7 @@ class CarRentalRepository():
             (rental_id,)
         )
         print("Retornar renta por id.")
-        return self._first_or_raise(results)
+        return self._first_or_raise(results, rental_id)
 
     def get_by_id_for_update(self, rental_id):
         results = self.db_manager.execute_query(
@@ -56,7 +62,7 @@ class CarRentalRepository():
             "FOR UPDATE;",
             (rental_id,)
         )
-        return self._first_or_raise(results)
+        return self._first_or_raise(results, rental_id)
 
     def get_by_user_id_and_rental_status(self, user_id, status):
         results = self.db_manager.execute_query(
@@ -66,7 +72,7 @@ class CarRentalRepository():
             "FOR UPDATE;",
             (user_id, status)
         )
-        return self._all_or_raise(results)
+        return self._all_or_none(results)
 
     def create(self, rental_data):
         results = self.db_manager.execute_query(
@@ -86,13 +92,27 @@ class CarRentalRepository():
     def update(self, rental_id, rental_data):
         results = self.db_manager.execute_query(
             "UPDATE lyfter_car_rental.car_rental " \
-            "SET user_id = %s, car_id = %s, rental_date_at = %s, return_date_at = %s, status = %s WHERE id = %s;",
+            "SET user_id = %s, car_id = %s, rental_date_at = %s, return_date_at = %s " \
+            "WHERE id = %s " \
+            "RETURNING *;",
             (
                 rental_data["user_id"],
                 rental_data["car_id"],
                 rental_data["rental_date_at"],
                 rental_data["return_date_at"],
-                rental_data["status"],
+                rental_id
+            )
+        )
+        return self._first_or_none(results)
+
+    def update_status(self, rental_id, target_status):
+        results = self.db_manager.execute_query(
+            "UPDATE lyfter_car_rental.car_rental " \
+            "SET status = %s " \
+            "WHERE id = %s" \
+            "RETURNING *;",
+            (
+                target_status,
                 rental_id
             )
         )

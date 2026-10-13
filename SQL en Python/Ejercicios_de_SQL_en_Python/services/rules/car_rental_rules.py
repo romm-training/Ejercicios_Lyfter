@@ -34,9 +34,9 @@ def rental_is_overdue(ctx):
 
 @guard("user_has_no_active_rentals")
 def user_has_no_active_rentals(ctx):
-    rentals = ctx.repos["car_rental"].get_by_user_id_and_rental_status(ctx.record["user_id"], CarRentalStatus.ACTIVE)
+    rentals = ctx.repos["car_rental"].get_by_user_id_and_rental_status(ctx.record["id"], CarRentalStatus.ACTIVE)
     if rentals:
-        raise BusinessRuleError(f"El usuario {ctx.record["user_id"]} tiene rentas activas o pendientes.")
+        raise BusinessRuleError(f"El usuario {ctx.record["id"]} tiene rentas activas o pendientes.")
 
 @effect("rental_to_pending")
 def rental_to_pending(ctx):
@@ -53,7 +53,7 @@ def rental_to_acive(ctx):
     )
 
 @effect("rental_to_completed")
-def rental_to_acive(ctx):
+def rental_to_completed(ctx):
     ctx.repos["car_rental"].update_status(
         ctx.current_record["car_rental_id"], 
         CarRentalStatus.COMPLETED

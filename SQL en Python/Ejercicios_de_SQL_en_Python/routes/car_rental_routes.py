@@ -26,8 +26,11 @@ def register_car_rental_routes(app, car_rental_service) -> None:
     def create_rental():
         try:
             rental_data = request.json
-            car_rental_service.create_rental(rental_data)
-            return jsonify({"message": "Rental created successfully"}), 201
+            result = car_rental_service.create_rental(rental_data)
+            if result:
+                return jsonify(result)
+            else:
+                return jsonify({"message": "Rental created successfully"}), 201
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 

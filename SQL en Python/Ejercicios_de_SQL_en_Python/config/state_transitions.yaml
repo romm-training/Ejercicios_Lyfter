@@ -13,6 +13,10 @@ user:
       to: inactive
       guards: [user_is_active, user_has_no_active_rentals]
       effects: []
+    - from: delinquent
+      to: active
+      guards: [user_is_delinquent, user_has_no_active_rentals]
+      effects: []
 
 car:
   states: [available, reserved, rented, maintenance, inactive, sold]

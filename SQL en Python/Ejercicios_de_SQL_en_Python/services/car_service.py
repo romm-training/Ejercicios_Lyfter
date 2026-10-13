@@ -1,41 +1,26 @@
 class CarService():
-    def __init__(self, car_repository, state_machine):
+    def __init__(self, car_repository, state_machine, db_manager):
         self.car_repository = car_repository
         self.state_machine = state_machine
+        self.db_manager = db_manager
 
     def get_all_cars(self):
-        try:
-            return self.car_repository.get_all()
-        except Exception as e:
-            print("Error in CarService.get_all_cars: ", e)
-            raise
+        return self.car_repository.get_all()
 
     def get_car_by_id(self, car_id):
-        try:
-            return self.car_repository.get_by_id(car_id)
-        except Exception as e:
-            print("Error in CarService.get_car_by_id: ", e)
-            raise
-
+        return self.car_repository.get_by_id(car_id)
+        
     def create_car(self, car_data):
-        try:
-            #self.car_repository.create(car_data)
-            return self.state_machine.create("car", car_data)
-        except Exception as e:
-            print("Error in CarService.create_car: ", e)
-            raise
+        return self.state_machine.create("car", car_data)
 
     def update_car(self, car_id, car_data):
-        try:
-            return self.state_machine.update(car_id, car_data)
-        except Exception as e:
-            print("Error in CarService.update_car: ", e)
-            raise
+        new_status = car_data.pop("status", None)
+        with self.db.transaction():
+            car = self.car_repository.get_by_id_for_update(car_id)
+            if new_status and new_status != car["status"]:
+                self.state_machine.change_status("car", car_id, new_status)
+            return self.car_repository.update(car_id, car_data)
 
     def delete_car(self, car_id):
-        try:
-            self.car_repository.delete(car_id)
-            return True
-        except Exception as e:
-            print("Error in CarService.delete_car: ", e)
-            raise
+        self.car_repository.delete(car_id)
+        return True

@@ -41,6 +41,7 @@ ENTITIES = {
 
 @dataclass
 class Context:
+    entity: str
     target_status: str
     repos: dict
     record: dict | None = None
@@ -109,14 +110,14 @@ class StateMachine:
     def change_status(self, entity, record_id, target_status):
         column = ENTITIES[entity]["column"]
         with self.db.transaction():
-            repos = self.repos()
+            repos = self._repos()
             repo = repos[entity]
             record = repo.get_by_id_for_update(record_id)
             current_status = record[column]
 
             t = self._find(entity, current_status, target_status)
 
-            ctx = Context(target_status=target_status, repos=repos, record=record)
+            ctx = Context(entity=entity, target_status=target_status, repos=repos, record=record)
 
             self._run(t.get("guards",[]), GUARDS, ctx)
 
@@ -131,7 +132,7 @@ class StateMachine:
         with self.db.transaction():
             repos = self._repos()
             t = self._find(entity, None, target_status)
-            ctx = Context(target_status=target_status, repos=repos, data=data)
+            ctx = Context(entity=entity, target_status=target_status, repos=repos, data=data)
             self._run(t.get("guards",[]), GUARDS, ctx)
 
             ctx.record = repos[entity].create({**data, column: target_status})

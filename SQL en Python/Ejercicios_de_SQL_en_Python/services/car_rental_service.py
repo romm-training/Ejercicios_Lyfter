@@ -1,41 +1,26 @@
 class CarRentalService():
-    def __init__(self, car_rental_repository, state_machine):
+    def __init__(self, car_rental_repository, state_machine, db_manager):
         self.car_rental_repository = car_rental_repository
         self.state_machine = state_machine
+        self.db_manager = db_manager
 
     def get_all_rentals(self):
-        try:
-            return self.car_rental_repository.get_all()
-        except Exception as e:
-            print("Error in CarRentalService.get_all_rentals: ", e)
-            raise
+        return self.car_rental_repository.get_all()
 
     def get_rental_by_id(self, rental_id):
-        try:
-            return self.car_rental_repository.get_by_id(rental_id)
-        except Exception as e:
-            print("Error in CarRentalService.get_rental_by_id: ", e)
-            raise
+        return self.car_rental_repository.get_by_id(rental_id)
 
     def create_rental(self, rental_data):
-        try:
-            #self.car_rental_repository.create(rental_data)
-            return self.state_machine.create("car_rental", rental_data)
-        except Exception as e:
-            print("Error in CarRentalService.create_rental: ", e)
-            raise
+        return self.state_machine.create("car_rental", rental_data)
 
     def update_rental(self, rental_id, rental_data):
-        try:
-            return self.state_machine.update(rental_id, rental_data)
-        except Exception as e:
-            print("Error in CarRentalService.update_rental: ", e)
-            raise
+        new_status = rental_data.pop("status", None)
+        with self.db_manager.transaction():
+            rental = self.car_rental_repository.get_by_id_for_update(rental_id)
+            if new_status and new_status != rental["status"]:
+                self.state_machine.change_status("user", rental_id, new_status)
+            return self.car_rental_repository.update(rental_id, rental_data)
 
     def delete_rental(self, rental_id):
-        try:
-            self.car_rental_repository.delete(rental_id)
-            return True
-        except Exception as e:
-            print("Error in CarRentalService.delete_rental: ", e)
-            raise
+        self.car_rental_repository.delete(rental_id)
+        return True
