@@ -4,8 +4,8 @@ class CarRentalService():
         self.state_machine = state_machine
         self.db_manager = db_manager
 
-    def get_all_rentals(self):
-        return self.car_rental_repository.get_all()
+    def get_all_rentals(self, filters):
+        return self.car_rental_repository.get_all(filters)
 
     def get_rental_by_id(self, rental_id):
         return self.car_rental_repository.get_by_id(rental_id)

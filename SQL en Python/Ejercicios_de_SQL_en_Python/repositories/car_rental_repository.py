@@ -1,4 +1,4 @@
-from exceptions import NotFoundError
+from exceptions import NotFoundError, BusinessRuleError
 
 class CarRentalRepository():
     def __init__(self, db_manager):
@@ -36,12 +36,22 @@ class CarRentalRepository():
         formatted_results = [self._format_record(result) for result in results]
         return formatted_results
 
-    def get_all(self):
-        results = self.db_manager.execute_query(
-            "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
-            "FROM lyfter_car_rental.car_rental;"
-        )
-        print("Retornar todas las rentas.")
+    def get_all(self, filters):
+        _COLUMNS_ALLOWED_TO_FILTER = {"user_id","car_id","rental_date_at","return_date_at","status"}
+
+        filters = filters or {}
+        invalid_filters = set(filters) - _COLUMNS_ALLOWED_TO_FILTER
+        if invalid_filters:
+            raise BusinessRuleError(f"Filtros inválidos: {invalid_filters}")
+
+        select = "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
+                "FROM lyfter_car_rental.car_rental"
+
+        where = " AND ".join(f"{f} = %s" for f in filters)
+
+        query = select + (f" WHERE {where}" if where else ";")
+        
+        results = self.db_manager.execute_query(query, tuple(filters.values()))
         return self._all_or_raise(results)
 
     def get_by_id(self, rental_id):

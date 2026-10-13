@@ -7,7 +7,7 @@ def register_user_routes(app: Flask, user_service) -> None:
     @app.route(f"{_BASE_URL}/", methods=["GET"])
     def get_all_users():
         try:
-            users = user_service.get_all_users()
+            users = user_service.get_all_users(request.args.to_dict())
             return jsonify(users), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 500

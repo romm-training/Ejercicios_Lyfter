@@ -4,8 +4,8 @@ class CarService():
         self.state_machine = state_machine
         self.db_manager = db_manager
 
-    def get_all_cars(self):
-        return self.car_repository.get_all()
+    def get_all_cars(self, filters):
+        return self.car_repository.get_all(filters)
 
     def get_car_by_id(self, car_id):
         return self.car_repository.get_by_id(car_id)

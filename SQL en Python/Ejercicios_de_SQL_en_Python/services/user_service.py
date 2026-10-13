@@ -4,8 +4,8 @@ class UserService():
         self.state_machine = state_machine
         self.db_manager = db_manager
 
-    def get_all_users(self):
-        return self.user_repository.get_all()
+    def get_all_users(self, filters):
+        return self.user_repository.get_all(filters)
 
     def get_user_by_id(self, user_id):
         return self.user_repository.get_by_id(user_id)

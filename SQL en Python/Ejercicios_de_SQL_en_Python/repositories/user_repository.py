@@ -1,4 +1,4 @@
-from exceptions import NotFoundError
+from exceptions import NotFoundError, BusinessRuleError
 
 class UserRepository:
     def __init__(self, db_manager):
@@ -37,11 +37,22 @@ class UserRepository:
         formatted_results = [self._format_record(result) for result in results]
         return formatted_results
 
-    def get_all(self):
-        results = self.db_manager.execute_query(
-            "SELECT id, name, email, username, birthdate_at, account_status " \
-            "FROM lyfter_car_rental.user;"
-        )
+    def get_all(self, filters=None):
+        _COLUMNS_ALLOWED_TO_FILTER = {"name","email","username","birthdate_at","account_status"}
+
+        filters = filters or {}
+        invalid_filters = set(filters) - _COLUMNS_ALLOWED_TO_FILTER
+        if invalid_filters:
+            raise BusinessRuleError(f"Filtros inválidos: {invalid_filters}")
+
+        select = "SELECT id, name, email, username, birthdate_at, account_status " \
+                "FROM lyfter_car_rental.user"
+
+        where = " AND ".join(f"{f} = %s" for f in filters)
+
+        query = select + (f" WHERE {where}" if where else ";")
+        
+        results = self.db_manager.execute_query(query, tuple(filters.values()))
         return self._all_or_raise(results)
 
     def get_by_id(self, user_id):

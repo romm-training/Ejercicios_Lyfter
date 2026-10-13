@@ -6,7 +6,7 @@ def register_car_rental_routes(app, car_rental_service) -> None:
     @app.route(f"{_BASE_URL}/", methods=["GET"])
     def get_all_rentals():
         try:
-            rentals = car_rental_service.get_all_rentals()
+            rentals = car_rental_service.get_all_rentals(request.args.to_dict())
             return jsonify(rentals), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 500
