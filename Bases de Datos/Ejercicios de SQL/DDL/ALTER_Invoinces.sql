@@ -1,0 +1,5 @@
+ALTER TABLE Invoices
+ADD COLUMN CustomerPhoneNumber VARCHAR(15) NULL;
+
+ALTER TABLE Invoices
+ADD COLUMN SellerCode VARCHAR(15) NULL;

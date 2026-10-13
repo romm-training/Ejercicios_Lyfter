@@ -1,0 +1,2 @@
+ALTER TABLE Products
+ADD COLUMN CategoryId INTEGER NULL;
