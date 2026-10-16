@@ -13,7 +13,7 @@ def register_user_routes(app: Flask, user_service) -> None:
             return jsonify(users), 200
         except BusinessRuleError as e:
             #logging str(e)
-            return jsonify({"error": f"Error al obtener los registros: {e}."}), 422
+            return jsonify({"error": f"Error al obtener los registros: {e}"}), 422
         except InvalidTransitionError as e:
             #logging str(e)
             return jsonify({"error": "Error al obtener los registros."}), 409
@@ -31,7 +31,7 @@ def register_user_routes(app: Flask, user_service) -> None:
             return jsonify(user), 200
         except BusinessRuleError as e:
             #logging str(e)
-            return jsonify({"error": f"Error al obtener el registro: {e}."}), 422
+            return jsonify({"error": f"Error al obtener el registro: {e}"}), 422
         except InvalidTransitionError as e:
             #logging str(e)
             return jsonify({"error": "Error al obtener el registro."}), 409
@@ -69,7 +69,7 @@ def register_user_routes(app: Flask, user_service) -> None:
             return jsonify(updated), 200
         except BusinessRuleError as e:
             #logging str(e)
-            return jsonify({"error": f"Error al actualizar el registro: {e}."}), 422
+            return jsonify({"error": f"Error al actualizar el registro: {e}"}), 422
         except InvalidTransitionError as e:
             #logging str(e)
             return jsonify({"error": "Error al actualizar el registro."}), 409
@@ -87,7 +87,7 @@ def register_user_routes(app: Flask, user_service) -> None:
             return "", 204
         except BusinessRuleError as e:
             #logging str(e)
-            return jsonify({"error": f"Error al eliminar el registro: {e}."}), 422
+            return jsonify({"error": f"Error al eliminar el registro: {e}"}), 422
         except InvalidTransitionError as e:
             #logging str(e)
             return jsonify({"error": "Error al eliminar el registro."}), 409

@@ -38,8 +38,8 @@ def user_has_no_active_rentals(ctx):
         ctx.current_record["id"], 
         CarRentalStatus.ACTIVE
     )
-    if rentals:
-        raise BusinessRuleError(f"El usuario {ctx.current_record["id"]} tiene rentas activas.")
+    if not rentals:
+        raise BusinessRuleError(f"El usuario {ctx.current_record["id"]} no tiene rentas activas.")
 
 @guard("user_has_overdue_rentals")
 def user_has_overdue_rentals(ctx):
@@ -49,6 +49,15 @@ def user_has_overdue_rentals(ctx):
     )
     if rentals:
         raise BusinessRuleError(f"El usuario {ctx.current_record["id"]} tiene rentas vencidas.")
+
+@guard("user_has_no_overdue_rentals")
+def user_has_no_overdue_rentals(ctx):
+    rentals = ctx.repos["car_rental"].get_by_user_id_and_rental_status(
+        ctx.current_record["id"], 
+        CarRentalStatus.OVERDUE
+    )
+    if not rentals:
+        raise BusinessRuleError(f"El usuario {ctx.current_record["id"]} no tiene rentas vencidas.")
 
 @guard("user_has_no_active_pending_overdue_rentals")
 def user_has_no_active_pending_overdue_rentals(ctx):

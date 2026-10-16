@@ -125,13 +125,10 @@ class CarRentalRepository():
     def update(self, rental_id, rental_data):
         results = self.db_manager.execute_query(
             "UPDATE lyfter_car_rental.car_rental " \
-            "SET user_id = %s, car_id = %s, rental_date_at = %s, return_date_at = %s " \
+            "SET return_date_at = %s " \
             "WHERE id = %s " \
             "RETURNING id, car_id, user_id, rental_date_at, return_date_at, status;",
             (
-                rental_data["user_id"],
-                rental_data["car_id"],
-                rental_data["rental_date_at"],
                 rental_data["return_date_at"],
                 rental_id
             )

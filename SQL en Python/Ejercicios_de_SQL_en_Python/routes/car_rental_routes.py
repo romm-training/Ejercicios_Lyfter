@@ -11,7 +11,7 @@ def register_car_rental_routes(app, car_rental_service) -> None:
             return jsonify(rentals), 200
         except BusinessRuleError as e:
             #logging str(e)
-            return jsonify({"error": f"Error al obtener los registros: {e}."}), 422
+            return jsonify({"error": f"Error al obtener los registros: {e}"}), 422
         except InvalidTransitionError as e:
             #logging str(e)
             return jsonify({"error": "Error al obtener los registros."}), 409
@@ -29,7 +29,7 @@ def register_car_rental_routes(app, car_rental_service) -> None:
             return jsonify(rental), 200
         except BusinessRuleError as e:
             #logging str(e)
-            return jsonify({"error": f"Error al obtener el registro: {e}."}), 422
+            return jsonify({"error": f"Error al obtener el registro: {e}"}), 422
         except InvalidTransitionError as e:
             #logging str(e)
             return jsonify({"error": "Error al obtener el registro."}), 409
@@ -48,7 +48,7 @@ def register_car_rental_routes(app, car_rental_service) -> None:
             return jsonify(result), 201
         except BusinessRuleError as e:
             #logging str(e)
-            return jsonify({"error": f"Error al crear el registro: {e}."}), 422
+            return jsonify({"error": f"Error al crear el registro: {e}"}), 422
         except InvalidTransitionError as e:
             #logging str(e)
             return jsonify({"error": "Error al crear el registro."}), 409
@@ -63,11 +63,13 @@ def register_car_rental_routes(app, car_rental_service) -> None:
     def update_rental(rental_id):
         try:
             rental_data = request.json
+            if rental_data["car_id"] or rental_data["user_id"] or rental_data["rental_date_at"]:
+                raise BusinessRuleError("Los campos 'car_id', 'user_id' y 'rental_date_at' no están permitidos en esta operación.")
             updated = car_rental_service.update_rental(rental_id, rental_data)
             return jsonify(updated), 200
         except BusinessRuleError as e:
             #logging str(e)
-            return jsonify({"error":f"Error al actualizar el registro: {e}."}), 422
+            return jsonify({"error":f"Error al actualizar el registro: {e}"}), 422
         except InvalidTransitionError as e:
             #logging str(e)
             return jsonify({"error": "Error al actualizar el registro."}), 409
@@ -85,7 +87,7 @@ def register_car_rental_routes(app, car_rental_service) -> None:
             return "", 204
         except BusinessRuleError as e:
             #logging str(e)
-            return jsonify({"error": f"Error al eliminar el registro: {e}."}), 422
+            return jsonify({"error": f"Error al eliminar el registro: {e}"}), 422
         except InvalidTransitionError as e:
             #logging str(e)
             return jsonify({"error": "Error al eliminar el registro."}), 409

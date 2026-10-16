@@ -11,11 +11,11 @@ user:
       effects: []
     - from: active
       to: delinquent
-      guards: [user_is_active, user_has_overdue_rentals]
+      guards: [user_is_active, user_has_no_overdue_rentals]
       effects: []
     - from: delinquent
       to: active
-      guards: [user_is_delinquent, user_has_no_active_rentals]
+      guards: [user_is_delinquent, user_has_overdue_rentals]
       effects: []
     - from: inactive
       to: active
