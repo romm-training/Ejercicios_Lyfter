@@ -3,3 +3,6 @@ class NotFoundError(Exception):
 
 class BusinessRuleError(Exception):
     pass
+
+class InvalidTransitionError(Exception):
+    pass

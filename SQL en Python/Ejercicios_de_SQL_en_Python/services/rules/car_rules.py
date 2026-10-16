@@ -4,8 +4,8 @@ from exceptions import BusinessRuleError
 
 def _car_id_helper(ctx):
     if ctx.entity == "car":
-        return ctx.record["id"]
-    source = ctx.record or ctx.data
+        return ctx.current_record["id"]
+    source = ctx.current_record or ctx.data
     return source["car_id"]
 
 @guard("car_is_available")
@@ -47,7 +47,7 @@ def car_is_sold(ctx):
 @effect("car_to_available")
 def car_to_available(ctx):
     ctx.repos["car"].update_status(
-        ctx.record[_car_id_helper(ctx)], 
+        _car_id_helper(ctx), 
         CarStatus.AVAILABLE
     )
 

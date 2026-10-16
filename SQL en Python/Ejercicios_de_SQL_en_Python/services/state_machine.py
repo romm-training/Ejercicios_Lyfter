@@ -4,18 +4,12 @@ from pathlib import Path
 
 import yaml
 
-#from services.rules import car_rental_rules, car_rules, user_rules
+from exceptions import InvalidTransitionError
 from repositories.car_repository import CarRepository
 from repositories.car_rental_repository import CarRentalRepository
 from repositories.user_repository import UserRepository
 
 DEFAULT_ENCODING = "utf-8"
-
-class InvalidTransitionError(Exception):
-    pass
-
-class BussinessRuleError(Exception):
-    pass
 
 GUARDS, EFFECTS = {}, {}
 
@@ -44,7 +38,7 @@ class Context:
     entity: str
     target_status: str
     repos: dict
-    record: dict | None = None
+    current_record: dict | None = None
     data: dict | None = None 
 
 def load_transitions(path):
@@ -86,7 +80,6 @@ def load_transitions(path):
 
     return table, initial
 
-
 class StateMachine:
     def __init__(self, db, table, initial):
         self.db = db
@@ -112,18 +105,18 @@ class StateMachine:
         with self.db.transaction():
             repos = self._repos()
             repo = repos[entity]
-            record = repo.get_by_id_for_update(record_id)
-            current_status = record[column]
+            current_record = repo.get_by_id_for_update(record_id)
+            current_status = current_record[column]
 
             t = self._find(entity, current_status, target_status)
 
-            ctx = Context(entity=entity, target_status=target_status, repos=repos, record=record)
+            ctx = Context(entity=entity, target_status=target_status, repos=repos, current_record=current_record)
 
             self._run(t.get("guards",[]), GUARDS, ctx)
 
             repo.update_status(record_id, target_status)
 
-            ctx.record = {**record, column: target_status}
+            ctx.current_record = {**current_record, column: target_status}
             self._run(t.get("effects",[]), EFFECTS, ctx)
 
     def create(self, entity, data):
@@ -135,10 +128,10 @@ class StateMachine:
             ctx = Context(entity=entity, target_status=target_status, repos=repos, data=data)
             self._run(t.get("guards",[]), GUARDS, ctx)
 
-            ctx.record = repos[entity].create({**data, column: target_status})
+            ctx.current_record = repos[entity].create({**data, column: target_status})
             self._run(t.get("effects",[]), EFFECTS, ctx)
 
-            return ctx.record
+            return ctx.current_record
 
 def build_state_machine(db):
     config_path = Path(__file__).resolve().parent.parent / os.environ["STATUS_TRANSITIONS_PATH"]

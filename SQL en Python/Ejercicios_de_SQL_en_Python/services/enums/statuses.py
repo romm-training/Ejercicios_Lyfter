@@ -34,7 +34,7 @@ class CarRentalStatus(StrEnum):
     PENDING = "pending"
     ACTIVE = "active"
     COMPLETED = "completed"
-    CANCELED = "canceled"
+    CANCELLED = "cancelled"
     OVERDUE = "overdue"
 
 

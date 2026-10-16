@@ -44,7 +44,7 @@ class CarRentalRepository():
         if invalid_filters:
             raise BusinessRuleError(f"Filtros inválidos: {invalid_filters}")
 
-        select = "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
+        select = "SELECT id, car_id, user_id, rental_date_at, return_date_at, status " \
                 "FROM lyfter_car_rental.car_rental"
 
         where = " AND ".join(f"{f} = %s" for f in filters)
@@ -56,7 +56,7 @@ class CarRentalRepository():
 
     def get_by_id(self, rental_id):
         results = self.db_manager.execute_query(
-            "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
+            "SELECT id, car_id, user_id, rental_date_at, return_date_at, status " \
             "FROM lyfter_car_rental.car_rental " \
             "WHERE id = %s;",
             (rental_id,)
@@ -66,9 +66,9 @@ class CarRentalRepository():
 
     def get_by_id_for_update(self, rental_id):
         results = self.db_manager.execute_query(
-            "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
+            "SELECT id, car_id, user_id, rental_date_at, return_date_at, status " \
             "FROM lyfter_car_rental.car_rental " \
-            "WHERE id = %s" \
+            "WHERE id = %s " \
             "FOR UPDATE;",
             (rental_id,)
         )
@@ -76,11 +76,34 @@ class CarRentalRepository():
 
     def get_by_user_id_and_rental_status(self, user_id, status):
         results = self.db_manager.execute_query(
-            "SELECT id, user_id, car_id, rental_date_at, return_date_at, status " \
+            "SELECT id, car_id, user_id, rental_date_at, return_date_at, status " \
             "FROM lyfter_car_rental.car_rental " \
-            "WHERE user_id = %s AND status = %s" \
+            "WHERE user_id = %s AND status = %s " \
             "FOR UPDATE;",
             (user_id, status)
+        )
+        return self._all_or_none(results)
+
+    def get_by_user_id_and_multiple_rental_status(self, user_id, statuses):
+        statuses_filter = ','.join(['%s'] * len(statuses))
+        query = f"""
+                SELECT id, car_id, user_id, rental_date_at, return_date_at, status 
+                FROM lyfter_car_rental.car_rental  
+                WHERE user_id = %s AND status IN ({statuses_filter})  
+                FOR UPDATE;
+                """
+        params = [user_id] + statuses
+
+        results = self.db_manager.execute_query(query, params)
+        return self._all_or_none(results)
+
+    def get_by_car_id_and_rental_status(self, car_id, status):
+        results = self.db_manager.execute_query(
+            "SELECT id, car_id, user_id, rental_date_at, return_date_at, status " \
+            "FROM lyfter_car_rental.car_rental " \
+            "WHERE car_id = %s AND status = %s " \
+            "FOR UPDATE;",
+            (car_id, status)
         )
         return self._all_or_none(results)
 
@@ -88,7 +111,7 @@ class CarRentalRepository():
         results = self.db_manager.execute_query(
             "INSERT INTO lyfter_car_rental.car_rental (user_id, car_id, rental_date_at, return_date_at, status) " \
             "VALUES (%s, %s, %s, %s, %s)" \
-            "RETURNING *;",
+            "RETURNING id, car_id, user_id, rental_date_at, return_date_at, status;",
             (
                 rental_data["user_id"],
                 rental_data["car_id"],
@@ -104,7 +127,7 @@ class CarRentalRepository():
             "UPDATE lyfter_car_rental.car_rental " \
             "SET user_id = %s, car_id = %s, rental_date_at = %s, return_date_at = %s " \
             "WHERE id = %s " \
-            "RETURNING *;",
+            "RETURNING id, car_id, user_id, rental_date_at, return_date_at, status;",
             (
                 rental_data["user_id"],
                 rental_data["car_id"],
@@ -119,8 +142,8 @@ class CarRentalRepository():
         results = self.db_manager.execute_query(
             "UPDATE lyfter_car_rental.car_rental " \
             "SET status = %s " \
-            "WHERE id = %s" \
-            "RETURNING *;",
+            "WHERE id = %s " \
+            "RETURNING id, car_id, user_id, rental_date_at, return_date_at, status;",
             (
                 target_status,
                 rental_id

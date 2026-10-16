@@ -104,7 +104,7 @@ class UserRepository:
         results = self.db_manager.execute_query(
             "UPDATE lyfter_car_rental.user " \
             "SET name = %s, email = %s, username = %s, password = %s, birthdate_at = %s " \
-            "WHERE id = %s" \
+            "WHERE id = %s " \
             "RETURNING id, name, email, username, birthdate_at, account_status;",
             (
                 user_data["name"],
@@ -121,7 +121,7 @@ class UserRepository:
         results = self.db_manager.execute_query(
             "UPDATE lyfter_car_rental.user " \
             "SET account_status = %s " \
-            "WHERE id = %s" \
+            "WHERE id = %s " \
             "RETURNING id, name, email, username, birthdate_at, account_status;",
             (
                 target_status,

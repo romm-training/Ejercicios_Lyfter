@@ -18,7 +18,7 @@ class CarRentalService():
         with self.db_manager.transaction():
             rental = self.car_rental_repository.get_by_id_for_update(rental_id)
             if new_status and new_status != rental["status"]:
-                self.state_machine.change_status("user", rental_id, new_status)
+                self.state_machine.change_status("car_rental", rental_id, new_status)
             return self.car_rental_repository.update(rental_id, rental_data)
 
     def delete_rental(self, rental_id):

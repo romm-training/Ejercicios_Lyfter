@@ -15,7 +15,7 @@ class CarService():
 
     def update_car(self, car_id, car_data):
         new_status = car_data.pop("status", None)
-        with self.db.transaction():
+        with self.db_manager.transaction():
             car = self.car_repository.get_by_id_for_update(car_id)
             if new_status and new_status != car["status"]:
                 self.state_machine.change_status("car", car_id, new_status)

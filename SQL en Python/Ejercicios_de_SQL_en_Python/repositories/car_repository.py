@@ -66,7 +66,7 @@ class CarRepository():
         results = self.db_manager.execute_query(
             "SELECT id, make, model, year, status " \
             "FROM lyfter_car_rental.car " \
-            "WHERE id = %s" \
+            "WHERE id = %s " \
             "FOR UPDATE;",
             (car_id,)
         )
@@ -74,13 +74,14 @@ class CarRepository():
 
     def create(self, car_data):
         results = self.db_manager.execute_query(
-            "INSERT INTO lyfter_car_rental.car (make, model, year) " \
-            "VALUES (%s, %s, %s)" \
+            "INSERT INTO lyfter_car_rental.car (make, model, year, status) " \
+            "VALUES (%s, %s, %s, %s)" \
             "RETURNING *;",
             (
                 car_data["make"],
                 car_data["model"],
-                car_data["year"]
+                car_data["year"],
+                car_data["status"]
             )
         )
         return self._first_or_none(results)
@@ -89,7 +90,7 @@ class CarRepository():
         results = self.db_manager.execute_query(
             "UPDATE lyfter_car_rental.car " \
             "SET make = %s, model = %s, year = %s " \
-            "WHERE id = %s" \
+            "WHERE id = %s " \
             "RETURNING *;",
             (
                 car_data["make"],
@@ -104,7 +105,7 @@ class CarRepository():
         results = self.db_manager.execute_query(
             "UPDATE lyfter_car_rental.car " \
             "SET status = %s " \
-            "WHERE id = %s" \
+            "WHERE id = %s " \
             "RETURNING *;",
             (
                 target_status,
