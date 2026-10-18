@@ -1,8 +1,13 @@
-class NotFoundError(Exception):
-    pass
+class AppError(Exception):
+    status_code = 500
+    message = "Error interno de la aplicación."
 
-class BusinessRuleError(Exception):
-    pass
+class NotFoundError(AppError):
+    status_code = 404
+    message = "Registro no encontrado."
 
-class InvalidTransitionError(Exception):
-    pass
+class BusinessRuleError(AppError):
+    status_code = 422
+
+class InvalidTransitionError(AppError):
+    status_code = 409

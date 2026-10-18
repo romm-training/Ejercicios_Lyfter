@@ -11,11 +11,11 @@ user:
       effects: []
     - from: active
       to: delinquent
-      guards: [user_is_active, user_has_no_overdue_rentals]
+      guards: [user_is_active, user_has_overdue_rentals]
       effects: []
     - from: delinquent
       to: active
-      guards: [user_is_delinquent, user_has_overdue_rentals]
+      guards: [user_is_delinquent, user_has_no_overdue_rentals]
       effects: []
     - from: inactive
       to: active
@@ -70,15 +70,15 @@ car_rental:
       effects: [rental_to_active,car_to_rented]
     - from: pending
       to: cancelled
-      guards: [rental_is_pending, user_is_active]
+      guards: [rental_is_pending]
       effects: [rental_to_cancelled, car_to_available]
     - from: active
       to: completed
-      guards: [rental_is_active, car_is_rented, user_is_active]
+      guards: [rental_is_active, car_is_rented]
       effects: [rental_to_completed, car_to_available]
     - from: active
       to: overdue
-      guards: [rental_is_active, user_is_active]
+      guards: [rental_is_active]
       effects: [rental_to_overdue, user_to_delinquent]
     - from: overdue
       to: completed

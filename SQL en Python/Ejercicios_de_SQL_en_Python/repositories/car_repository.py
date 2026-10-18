@@ -23,9 +23,7 @@ class CarRepository():
             return None
         return self._format_record(results[0])
 
-    def _all_or_raise(self, results):
-        if not results:
-            raise NotFoundError(f"No se han encontrado registros.")
+    def _format_all(self, results):
         formatted_results = [self._format_record(result) for result in results]
         return formatted_results
 
@@ -51,7 +49,7 @@ class CarRepository():
         query = select + (f" WHERE {where}" if where else ";")
 
         results = self.db_manager.execute_query(query, tuple(filters.values()))
-        return self._all_or_raise(results)
+        return self._format_all(results)
 
     def get_by_id(self, car_id):
         results = self.db_manager.execute_query(
@@ -75,7 +73,7 @@ class CarRepository():
     def create(self, car_data):
         results = self.db_manager.execute_query(
             "INSERT INTO lyfter_car_rental.car (make, model, year, status) " \
-            "VALUES (%s, %s, %s, %s)" \
+            "VALUES (%s, %s, %s, %s) " \
             "RETURNING *;",
             (
                 car_data["make"],

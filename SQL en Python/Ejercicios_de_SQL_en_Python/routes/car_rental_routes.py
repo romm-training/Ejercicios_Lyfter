@@ -6,94 +6,44 @@ _BASE_URL = "/api/v1/rentals"
 def register_car_rental_routes(app, car_rental_service) -> None:
     @app.route(f"{_BASE_URL}/", methods=["GET"])
     def get_all_rentals():
-        try:
-            rentals = car_rental_service.get_all_rentals(request.args.to_dict())
-            return jsonify(rentals), 200
-        except BusinessRuleError as e:
-            #logging str(e)
-            return jsonify({"error": f"Error al obtener los registros: {e}"}), 422
-        except InvalidTransitionError as e:
-            #logging str(e)
-            return jsonify({"error": "Error al obtener los registros."}), 409
-        except NotFoundError as e:
-            #logging str(e)
-            return jsonify([]), 200
-        except Exception as e:
-            #logging str(e)
-            return jsonify({"error": "Excepción al obtener los registros."}), 500
+        rentals = car_rental_service.get_all_rentals(request.args.to_dict())
+        return jsonify(rentals), 200
 
     @app.route(f"{_BASE_URL}/<int:rental_id>", methods=["GET"])
     def get_rental_by_id(rental_id):
-        try:
-            rental = car_rental_service.get_rental_by_id(rental_id)
-            return jsonify(rental), 200
-        except BusinessRuleError as e:
-            #logging str(e)
-            return jsonify({"error": f"Error al obtener el registro: {e}"}), 422
-        except InvalidTransitionError as e:
-            #logging str(e)
-            return jsonify({"error": "Error al obtener el registro."}), 409
-        except NotFoundError as e:
-            #logging str(e)
-            return jsonify({"error": "Registro no encontrado."}), 404
-        except Exception as e:
-            #logging str(e)
-            return jsonify({"error": "Excepción al obtener el registro."}), 500
+        rental = car_rental_service.get_rental_by_id(rental_id)
+        return jsonify(rental), 200
 
     @app.route(f"{_BASE_URL}/", methods=["POST"])
     def create_rental():
-        try:
-            rental_data = request.json
-            result = car_rental_service.create_rental(rental_data)
-            return jsonify(result), 201
-        except BusinessRuleError as e:
-            #logging str(e)
-            return jsonify({"error": f"Error al crear el registro: {e}"}), 422
-        except InvalidTransitionError as e:
-            #logging str(e)
-            return jsonify({"error": "Error al crear el registro."}), 409
-        except NotFoundError as e:
-            #logging str(e)
-            return jsonify({"error": "Registro no encontrado."}), 404
-        except Exception as e:
-            #logging str(e)
-            return jsonify({"error": "Excepción al crear el registro."}), 500
+        rental_data = request.json
+        not_allowed_keys = ["rental_date_at"]
+        required_keys = ["car_id", "user_id", "return_date_at", "status"]
+        
+        if any(k in rental_data for k in not_allowed_keys):
+            raise BusinessRuleError("El campo 'rental_date_at' no está permitido en esta operación.")
+
+        if not all(k in rental_data for k in required_keys):
+            raise BusinessRuleError("Los campos 'car_id', 'user_id', 'return_date_at' y 'status' son requeridos.")
+        
+        result = car_rental_service.create_rental(rental_data)
+        return jsonify(result), 201
 
     @app.route(f"{_BASE_URL}/<int:rental_id>", methods=["PUT"])
     def update_rental(rental_id):
-        try:
-            rental_data = request.json
-            if rental_data["car_id"] or rental_data["user_id"] or rental_data["rental_date_at"]:
-                raise BusinessRuleError("Los campos 'car_id', 'user_id' y 'rental_date_at' no están permitidos en esta operación.")
-            updated = car_rental_service.update_rental(rental_id, rental_data)
-            return jsonify(updated), 200
-        except BusinessRuleError as e:
-            #logging str(e)
-            return jsonify({"error":f"Error al actualizar el registro: {e}"}), 422
-        except InvalidTransitionError as e:
-            #logging str(e)
-            return jsonify({"error": "Error al actualizar el registro."}), 409
-        except NotFoundError as e:
-            #logging str(e)
-            return jsonify({"error": "Registro no encontrado."}), 404
-        except Exception as e:
-            #logging str(e)
-            return jsonify({"error": "Excepción al actualizar el registro."}), 500
+        rental_data = request.json
+        not_allowed_keys = ["car_id", "user_id", "rental_date_at"]
+        required_keys = ["status"]
+
+        if any(k in rental_data for k in not_allowed_keys):
+            raise BusinessRuleError("Los campos 'car_id', 'user_id' y 'rental_date_at' no están permitidos en esta operación.")
+        if not all(k in rental_data for k in required_keys):
+            raise BusinessRuleError("El campo 'status' es requerido.")
+        
+        updated = car_rental_service.update_rental(rental_id, rental_data)
+        return jsonify(updated), 200
 
     @app.route(f"{_BASE_URL}/<int:rental_id>", methods=["DELETE"])
     def delete_rental(rental_id):
-        try:
-            car_rental_service.delete_rental(rental_id)
-            return "", 204
-        except BusinessRuleError as e:
-            #logging str(e)
-            return jsonify({"error": f"Error al eliminar el registro: {e}"}), 422
-        except InvalidTransitionError as e:
-            #logging str(e)
-            return jsonify({"error": "Error al eliminar el registro."}), 409
-        except NotFoundError as e:
-            #logging str(e)
-            return jsonify({"error": "Registro no encontrado."}), 404
-        except Exception as e:
-            #logging str(e)
-            return jsonify({"error": "Excepción al eliminar el registro."}), 500
+        car_rental_service.delete_rental(rental_id)
+        return "", 204

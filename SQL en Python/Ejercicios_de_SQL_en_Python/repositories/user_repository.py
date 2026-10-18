@@ -25,9 +25,7 @@ class UserRepository:
             return None
         return self._format_record(results[0])
 
-    def _all_or_raise(self, results):
-        if not results:
-            raise NotFoundError(f"No se han encontrado registros.")
+    def _format_all(self, results):
         formatted_results = [self._format_record(result) for result in results]
         return formatted_results
 
@@ -53,7 +51,7 @@ class UserRepository:
         query = select + (f" WHERE {where}" if where else ";")
         
         results = self.db_manager.execute_query(query, tuple(filters.values()))
-        return self._all_or_raise(results)
+        return self._format_all(results)
 
     def get_by_id(self, user_id):
         results = self.db_manager.execute_query(

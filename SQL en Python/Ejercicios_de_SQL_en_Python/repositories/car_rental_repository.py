@@ -24,9 +24,7 @@ class CarRentalRepository():
             return None
         return self._format_record(results[0])
 
-    def _all_or_raise(self, results):
-        if not results:
-            raise NotFoundError(f"No se han encontrado registros.")
+    def _format_all(self, results):
         formatted_results = [self._format_record(result) for result in results]
         return formatted_results
 
@@ -52,7 +50,7 @@ class CarRentalRepository():
         query = select + (f" WHERE {where}" if where else ";")
         
         results = self.db_manager.execute_query(query, tuple(filters.values()))
-        return self._all_or_raise(results)
+        return self._format_all(results)
 
     def get_by_id(self, rental_id):
         results = self.db_manager.execute_query(
@@ -61,7 +59,6 @@ class CarRentalRepository():
             "WHERE id = %s;",
             (rental_id,)
         )
-        print("Retornar renta por id.")
         return self._first_or_raise(results, rental_id)
 
     def get_by_id_for_update(self, rental_id):
@@ -109,13 +106,12 @@ class CarRentalRepository():
 
     def create(self, rental_data):
         results = self.db_manager.execute_query(
-            "INSERT INTO lyfter_car_rental.car_rental (user_id, car_id, rental_date_at, return_date_at, status) " \
-            "VALUES (%s, %s, %s, %s, %s)" \
+            "INSERT INTO lyfter_car_rental.car_rental (user_id, car_id, return_date_at, status) " \
+            "VALUES (%s, %s, %s, %s) " \
             "RETURNING id, car_id, user_id, rental_date_at, return_date_at, status;",
             (
                 rental_data["user_id"],
                 rental_data["car_id"],
-                rental_data["rental_date_at"],
                 rental_data["return_date_at"],
                 rental_data["status"]
             )
@@ -154,4 +150,3 @@ class CarRentalRepository():
             "WHERE id = %s;",
             (rental_id,)
         )
-        print("Car rental deleted from database.")

@@ -39,21 +39,24 @@ def username_and_email_no_exist(ctx):
 
 @effect("user_to_active")
 def user_to_active(ctx):
+    user_id = _user_id_helper(ctx)
     ctx.repos["user"].update_status(
-        ctx.current_record[_user_id_helper(ctx)], 
+        user_id, 
         UserStatus.ACTIVE
     )
 
 @effect("user_to_inactive")
 def user_to_inactive(ctx):
+    user_id = _user_id_helper(ctx)
     ctx.repos["user"].update_status(
-        ctx.current_record[_user_id_helper(ctx)], 
+        user_id, 
         UserStatus.INACTIVE
     )
 
 @effect("user_to_delinquent")
 def user_to_delinquent(ctx):
+    user_id = _user_id_helper(ctx)
     ctx.repos["user"].update_status(
-        ctx.current_record[_user_id_helper(ctx)], 
+        user_id, 
         UserStatus.DELINQUENT
     )
