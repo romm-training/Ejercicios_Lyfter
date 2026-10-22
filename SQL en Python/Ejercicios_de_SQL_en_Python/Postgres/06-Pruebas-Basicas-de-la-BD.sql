@@ -27,7 +27,7 @@ BEGIN
     -- 5
     INSERT INTO lyfter_car_rental.car_rental (car_id, user_id, return_date_at, status)
     VALUES (v_car_id, v_user_id, NULL, 'active')
-    RETURNING id INTO car_rental_id;
+    RETURNING id INTO v_car_rental_id;
 
     -- 6
     UPDATE lyfter_car_rental.car 
@@ -36,7 +36,7 @@ BEGIN
 
     UPDATE lyfter_car_rental.car_rental
     SET status = 'completed'
-    WHERE id = car_rental_id;
+    WHERE id = v_car_rental_id;
 
     -- 7
 

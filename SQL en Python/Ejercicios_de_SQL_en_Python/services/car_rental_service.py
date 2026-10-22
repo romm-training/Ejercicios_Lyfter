@@ -19,6 +19,11 @@ class CarRentalService():
             rental = self.car_rental_repository.get_by_id_for_update(rental_id)
             if new_status and new_status != rental["status"]:
                 self.state_machine.change_status("car_rental", rental_id, new_status)
+
+            return_date_field_name = "return_date_at"
+            if return_date_field_name not in rental_data:
+                rental_data[return_date_field_name] = rental[return_date_field_name]
+
             return self.car_rental_repository.update(rental_id, rental_data)
 
     def delete_rental(self, rental_id):
