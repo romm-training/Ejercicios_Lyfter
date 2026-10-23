@@ -20,6 +20,16 @@ def register_car_routes(app: Flask, car_service) -> None:
     def create_car():
         car_data = request.json
         new_car = car_service.create_car(car_data)
+
+        not_allowed_keys = ["status"]
+        required_keys = ["make", "model", "year"]
+        
+        if any(k in car_data for k in not_allowed_keys):
+            raise BusinessRuleError(f"Los campos {not_allowed_keys} no están permitido en esta operación.")
+
+        if not all(k in car_data for k in required_keys):
+            raise BusinessRuleError(f"Los campos {required_keys} son requeridos.")
+        
         return jsonify(new_car), 201
 
     @app.route(f"{_BASE_URL}/<int:car_id>", methods=["PUT"])

@@ -20,6 +20,16 @@ def register_user_routes(app: Flask, user_service) -> None:
     def create_user():
         user_data = request.json
         created_user = user_service.create_user(user_data)
+
+        not_allowed_keys = ["account_status"]
+        required_keys = ["username", "password", "name", "email", "birthdate_at"]
+        
+        if any(k in user_data for k in not_allowed_keys):
+            raise BusinessRuleError(f"Los campos {not_allowed_keys} no están permitido en esta operación.")
+
+        if not all(k in user_data for k in required_keys):
+            raise BusinessRuleError(f"Los campos {required_keys} son requeridos.")
+                                                    
         return jsonify(created_user), 201
 
     @app.route(f"{_BASE_URL}/<int:user_id>", methods=["PUT"])

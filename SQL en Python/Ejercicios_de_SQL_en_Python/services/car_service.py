@@ -19,6 +19,19 @@ class CarService():
             car = self.car_repository.get_by_id_for_update(car_id)
             if new_status and new_status != car["status"]:
                 self.state_machine.change_status("car", car_id, new_status)
+
+            make_field = "make"
+            if make_field not in car_data:
+                car_data[make_field] = car[make_field]
+
+            model_field = "model"
+            if model_field not in car_data:
+                car_data[model_field] = car[model_field]
+
+            year_field = "year"
+            if year_field not in car_data:
+                car_data[year_field] = car[year_field]
+            
             return self.car_repository.update(car_id, car_data)
 
     def delete_car(self, car_id):

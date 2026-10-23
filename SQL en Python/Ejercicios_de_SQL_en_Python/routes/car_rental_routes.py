@@ -17,14 +17,14 @@ def register_car_rental_routes(app, car_rental_service) -> None:
     @app.route(f"{_BASE_URL}/", methods=["POST"])
     def create_rental():
         rental_data = request.json
-        not_allowed_keys = ["rental_date_at"]
-        required_keys = ["car_id", "user_id", "return_date_at", "status"]
+        not_allowed_keys = ["rental_date_at", "status"]
+        required_keys = ["car_id", "user_id", "return_date_at"]
         
         if any(k in rental_data for k in not_allowed_keys):
-            raise BusinessRuleError("El campo 'rental_date_at' no está permitido en esta operación.")
+            raise BusinessRuleError(f"Los campos {not_allowed_keys} no están permitido en esta operación.")
 
         if not all(k in rental_data for k in required_keys):
-            raise BusinessRuleError("Los campos 'car_id', 'user_id', 'return_date_at' y 'status' son requeridos.")
+            raise BusinessRuleError(f"Los campos {required_keys} son requeridos.")
         
         result = car_rental_service.create_rental(rental_data)
         return jsonify(result), 201
