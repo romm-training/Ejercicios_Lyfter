@@ -34,6 +34,11 @@ class CarRentalRepository():
         formatted_results = [self._format_record(result) for result in results]
         return formatted_results
 
+    @staticmethod
+    def get_table_name():
+        return "car_rental"
+
+    @staticmethod
     def get_field_names():
         return [
             "id",

@@ -11,3 +11,9 @@ class BusinessRuleError(AppError):
 
 class InvalidTransitionError(AppError):
     status_code = 409
+
+class BackupError(AppError):
+    status_code = 500
+
+class HealthRuleError(AppError):
+    status_code = 422

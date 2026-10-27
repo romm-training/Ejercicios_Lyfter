@@ -86,3 +86,12 @@ class PgManager():
                 if self._depth == 0:
                     self.connection.rollback()
                 raise
+
+    def ping(self):
+        if not self.connection or self.connection.closed:
+            return False
+        try:
+            result = self.execute_query("SELECT 1;") == [(1,)]
+            return result
+        except Exception:
+            return False

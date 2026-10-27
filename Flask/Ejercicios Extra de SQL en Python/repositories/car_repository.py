@@ -33,6 +33,11 @@ class CarRepository():
         formatted_results = [self._format_record(result) for result in results]
         return formatted_results
 
+    @staticmethod
+    def get_table_name():
+        return "car"
+
+    @staticmethod
     def get_field_names():
         return [
             "id",
@@ -42,7 +47,7 @@ class CarRepository():
             "status"
         ]
 
-    def get_all(self, filters):
+    def get_all(self, filters=None):
         _COLUMNS_ALLOWED_TO_FILTER = {"make","model","year","status"}
 
         filters = filters or {}
