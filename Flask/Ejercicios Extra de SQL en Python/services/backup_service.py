@@ -1,5 +1,7 @@
+from services.backup_writer import BackupWriter
+
 class BackupService():
-    def __init__(self, repositories, backup_writer):
+    def __init__(self, repositories, backup_writer: BackupWriter):
         self.repositories = repositories
         self.backup_writer = backup_writer
 

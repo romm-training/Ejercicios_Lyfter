@@ -1,65 +1,35 @@
-from exceptions import NotFoundError, BusinessRuleError
+from exceptions import BusinessRuleError
+from repositories.base_repository import BaseRepository
 
-class UserRepository:
-    def __init__(self, db_manager):
-        self.db_manager = db_manager
+class UserRepository(BaseRepository):
+    _COLUMNS = ("id", "name", "email", "username", "birthdate_at", "account_status")
+    _ENTITY_LABEL = "Usuario"
+    _SELECT_COLUMNS = ", ".join(_COLUMNS)
 
-    def _format_record(self, user_record):
-        return {
-            "id": user_record[0],
-            "name": user_record[1],
-            "email": user_record[2],
-            "username": user_record[3],
-            "password": "***",
-            "birthdate_at": user_record[4],
-            "account_status": user_record[5]
-        }
-
-    def _first_or_raise(self, results, user_id):
-        if not results:
-            raise NotFoundError(f"Usuario {user_id} no encontrado.")
-        return self._format_record(results[0])
-
-    def _first_or_none(self, results):
-        if not results:
-            return None
-        return self._format_record(results[0])
-
-    def _format_all(self, results):
-        formatted_results = [self._format_record(result) for result in results]
-        return formatted_results
-
-    def _all_or_none(self, results):
-        if not results:
-            return None
-        formatted_results = [self._format_record(result) for result in results]
-        return formatted_results
+    def _format_record(self, record):
+        data = super()._format_record(record)
+        data["password"] = "***"
+        return data
 
     @staticmethod
     def get_table_name():
         return "user"
 
-    @staticmethod
-    def get_field_names():
-        return [
-            "id",
-            "name",
-            "email",
-            "username",
-            "password",
-            "birthdate_at",
-            "account_status"
-        ]
+    @classmethod
+    def get_field_names(cls):
+        columns = list(cls._COLUMNS)
+        columns.insert(columns.index("username") + 1, "password")
+        return columns
 
     def get_all(self, filters=None):
-        _COLUMNS_ALLOWED_TO_FILTER = {"name","email","username","birthdate_at","account_status"}
+        _COLUMNS_ALLOWED_TO_FILTER = set(self._COLUMNS) - {"id"}
 
         filters = filters or {}
         invalid_filters = set(filters) - _COLUMNS_ALLOWED_TO_FILTER
         if invalid_filters:
             raise BusinessRuleError(f"Filtros inválidos: {invalid_filters}")
 
-        select = "SELECT id, name, email, username, birthdate_at, account_status " \
+        select = f"SELECT {self._SELECT_COLUMNS} " \
                 "FROM lyfter_car_rental.user"
 
         where = " AND ".join(f"{f} = %s" for f in filters)
@@ -71,7 +41,7 @@ class UserRepository:
 
     def get_by_id(self, user_id):
         results = self.db_manager.execute_query(
-            "SELECT id, name, email, username, birthdate_at, account_status " \
+            f"SELECT {self._SELECT_COLUMNS} " \
             "FROM lyfter_car_rental.user " \
             "WHERE id = %s;",
             (user_id,)
@@ -80,7 +50,7 @@ class UserRepository:
 
     def get_by_id_for_update(self, user_id):
         results = self.db_manager.execute_query(
-            "SELECT id, name, email, username, birthdate_at, account_status " \
+            f"SELECT {self._SELECT_COLUMNS} " \
             "FROM lyfter_car_rental.user " \
             "WHERE id = %s " \
             "FOR UPDATE;",
@@ -90,7 +60,7 @@ class UserRepository:
 
     def get_by_username_or_email_for_update(self, username, email):
         results = self.db_manager.execute_query(
-            "SELECT id, name, email, username, birthdate_at, account_status " \
+            f"SELECT {self._SELECT_COLUMNS} " \
             "FROM lyfter_car_rental.user " \
             "WHERE username = %s OR email = %s " \
             "FOR UPDATE;",
@@ -102,7 +72,7 @@ class UserRepository:
         results = self.db_manager.execute_query(
             "INSERT INTO lyfter_car_rental.user (name, email, username, password, birthdate_at, account_status) " \
             "VALUES (%s, %s, %s, %s, %s, %s) " \
-            "RETURNING id, name, email, username, birthdate_at, account_status;",
+            f"RETURNING {self._SELECT_COLUMNS};",
             (
                 user_data["name"],
                 user_data["email"],
@@ -119,7 +89,7 @@ class UserRepository:
             "UPDATE lyfter_car_rental.user " \
             "SET name = %s, email = %s, username = %s, password = %s, birthdate_at = %s " \
             "WHERE id = %s " \
-            "RETURNING id, name, email, username, birthdate_at, account_status;",
+            f"RETURNING {self._SELECT_COLUMNS};",
             (
                 user_data["name"],
                 user_data["email"],
@@ -136,7 +106,7 @@ class UserRepository:
             "UPDATE lyfter_car_rental.user " \
             "SET account_status = %s " \
             "WHERE id = %s " \
-            "RETURNING id, name, email, username, birthdate_at, account_status;",
+            f"RETURNING {self._SELECT_COLUMNS};",
             (
                 target_status,
                 user_id

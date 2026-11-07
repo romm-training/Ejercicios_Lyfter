@@ -1,22 +1,25 @@
-import psycopg2, os, threading
+import logging
+import os
+import threading
 from contextlib import contextmanager
 
+import psycopg2
+
+logger = logging.getLogger(__name__)
+
+
 class PgManager():
-    def __init__(self, db_name, user, password, host, port=5432, min_conn=1, max_conn=10):
+    def __init__(self, db_name, user, password, host, port=5432):
         self.db_name = db_name
         self.user = user
         self.password = password
         self.host = host
         self.port = port
-        self.min_conn = min_conn
-        self.max_conn = max_conn
         self._depth = 0
         self._lock = threading.RLock()
 
         self.connection = self.create_connection(db_name, user, password, host, port)
-        if self.connection:
-            self.cursor = self.connection.cursor()
-            print("Connected to database!")
+        logger.info("Connected to database.")
 
     @classmethod
     def from_env(cls):
@@ -25,9 +28,7 @@ class PgManager():
             user = os.environ["DB_USER"],
             password = os.environ["DB_PASSWORD"],
             host = os.environ.get("DB_HOST","localhost"),
-            port = int(os.environ.get("DB_PORT",5432)),
-            min_conn = int(os.environ.get("DB_POOL_MIN",1)),
-            max_conn = int(os.environ.get("DB_POOL_MAX",10))
+            port = int(os.environ.get("DB_PORT",5432))
         )
 
     @contextmanager
@@ -46,43 +47,36 @@ class PgManager():
             finally:
                 self._depth -= 1
 
-
     def create_connection(self, db_name, user, password, host, port):
         try:
-            connection = psycopg2.connect(
+            return psycopg2.connect(
                 dbname=db_name,
                 user=user,
                 password=password,
                 host=host,
                 port=port
             )
-            return connection
-        except Exception as e:
-            print("Error connecting to database:", e)
-            return None
+        except Exception:
+            logger.exception("Error connecting to database")
+            raise
 
     def close_connection(self):
-        if self.cursor:
-            self.cursor.close()
         if self.connection:
             self.connection.close()
-        print("Connection closed.")
+        logger.info("Connection closed.")
 
     def execute_query(self, query, params=None):
         with self._lock:
             try:
-                if params is None:
-                    self.cursor.execute(query)
-                else:
-                    self.cursor.execute(query, params)
+                with self.connection.cursor() as cursor:
+                    cursor.execute(query, params)
+                    results = cursor.fetchall() if cursor.description else None
 
                 if self._depth == 0:
                     self.connection.commit()
-
-                if self.cursor.description:
-                    return self.cursor.fetchall()
+                return results
             except Exception as e:
-                print("Error executing query:",e)
+                logger.error("Error executing query: %s", e)
                 if self._depth == 0:
                     self.connection.rollback()
                 raise
@@ -91,7 +85,6 @@ class PgManager():
         if not self.connection or self.connection.closed:
             return False
         try:
-            result = self.execute_query("SELECT 1;") == [(1,)]
-            return result
+            return self.execute_query("SELECT 1;") == [(1,)]
         except Exception:
             return False

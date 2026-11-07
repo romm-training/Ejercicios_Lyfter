@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from exceptions import HealthRuleError
 
+REQUIRED_TABLES = ("car", "car_rental", "user")
+
 class HealthCheck(ABC):
     name: str
 
@@ -23,8 +25,10 @@ class RequiredTablesCheck(HealthCheck):
         self.repository = repository
 
     def run(self):
-        if len(self.repository.check_existing_tables()) != 3:
-            raise HealthRuleError("Faltan tablas requeridas.")
+        existing = {row[0] for row in self.repository.check_existing_tables(REQUIRED_TABLES)}
+        missing = set(REQUIRED_TABLES) - existing
+        if missing:
+            raise HealthRuleError(f"Faltan tablas requeridas: {sorted(missing)}")
 
 class CarsTableRecordQuantityCheck(HealthCheck):
     name = "car_table_record_quantity"
@@ -32,6 +36,6 @@ class CarsTableRecordQuantityCheck(HealthCheck):
         self.repository = repository
 
     def run(self):
-        if self.repository.get_record_quantity_in_car_table() == 0:
+        if self.repository.get_count_of_available_cars() == 0:
             raise HealthRuleError("No hay registros en la tabla de carros.")
         

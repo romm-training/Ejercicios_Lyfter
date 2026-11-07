@@ -3,8 +3,6 @@ import logging, os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
-
 from infrastructure.db import PgManager
 from infrastructure.backup_writer_factory import create_backup_writer
 
@@ -18,7 +16,7 @@ from services.car_service import CarService
 from services.car_rental_service import CarRentalService
 from services.state_machine import build_state_machine
 from services.backup_service import BackupService
-from services.rules.health_rules import DbConnectionCheck, RequiredTablesCheck, CarsTableRecordQuantityCheck
+from services.health_checks import DbConnectionCheck, RequiredTablesCheck, CarsTableRecordQuantityCheck
 from services.health_service import HealthService
 
 from routes.error_handlers import register_error_handlers
@@ -32,60 +30,64 @@ from routes.health_routes import register_health_routes
 def configure_logging():
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",    
+        format="%(asctime)s [%(levelname)s] %(message)s",
     )
 
-configure_logging()
+def create_app(db_manager=None, backup_writer=None) -> Flask:
+    app = Flask(__name__)
 
-app = Flask(__name__)
+    db_manager = db_manager or PgManager.from_env()
 
-db_manager = PgManager.from_env()
+    user_repository = UserRepository(db_manager)
+    car_repository = CarRepository(db_manager)
+    car_rental_repository = CarRentalRepository(db_manager)
+    health_repository = HealthRepository(db_manager)
 
-state_machine = build_state_machine(db_manager)
+    state_machine = build_state_machine(db_manager, {
+        "user": user_repository,
+        "car": car_repository,
+        "car_rental": car_rental_repository,
+    })
 
-user_repository = UserRepository(db_manager)
-car_repository = CarRepository(db_manager)
-car_rental_repository = CarRentalRepository(db_manager)
-health_repository = HealthRepository(db_manager)
+    user_service = UserService(user_repository, state_machine, db_manager)
+    car_service = CarService(car_repository, state_machine, db_manager)
+    car_rental_service = CarRentalService(car_rental_repository, state_machine, db_manager)
 
-user_service = UserService(user_repository, state_machine, db_manager)
-car_service = CarService(car_repository, state_machine, db_manager)
-car_rental_service = CarRentalService(car_rental_repository, state_machine, db_manager)
-
-repositories_to_backup = [
-    user_repository,
-    car_repository,
-    car_rental_repository
-]
-
-backup_path = Path(os.environ["BACKUP_PATH"]).resolve()
-backup_writer_type = os.environ["BACKUP_WRITER_TYPE"]
-
-backup_writer = create_backup_writer(
-    backup_writer_type,
-    backup_path
-)
-backup_service = BackupService(
-    repositories_to_backup, 
-    backup_writer
-)
-
-health_service = HealthService(
-    [
-        DbConnectionCheck(health_repository),
-        RequiredTablesCheck(health_repository),
-        CarsTableRecordQuantityCheck(health_repository)
+    repositories_to_backup = [
+        user_repository,
+        car_repository,
+        car_rental_repository
     ]
-)
 
-register_error_handlers(app)
+    if backup_writer is None:
+        backup_writer = create_backup_writer(
+            os.environ["BACKUP_WRITER_TYPE"],
+            Path(os.environ["BACKUP_PATH"]).resolve()
+        )
+    backup_service = BackupService(
+        repositories_to_backup,
+        backup_writer
+    )
 
-register_user_routes(app, user_service)
-register_car_routes(app, car_service)
-register_car_rental_routes(app, car_rental_service)
-register_backup_routes(app, backup_service )
-register_health_routes(app, health_service)
+    health_service = HealthService(
+        [
+            DbConnectionCheck(health_repository),
+            RequiredTablesCheck(health_repository),
+            CarsTableRecordQuantityCheck(health_repository)
+        ]
+    )
+
+    register_error_handlers(app)
+
+    register_user_routes(app, user_service)
+    register_car_routes(app, car_service)
+    register_car_rental_routes(app, car_rental_service)
+    register_backup_routes(app, backup_service )
+    register_health_routes(app, health_service)
+
+    return app
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    app.run(debug=True)
+    load_dotenv()
+    configure_logging()
+    create_app().run(debug=True)

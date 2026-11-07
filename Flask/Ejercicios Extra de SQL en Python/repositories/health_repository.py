@@ -1,22 +1,22 @@
-from exceptions import HealthRuleError
-
 class HealthRepository:
     def __init__(self, db_manager):
         self.db_manager = db_manager
 
-    def check_existing_tables(self):
+    def check_existing_tables(self, tables):
         result = self.db_manager.execute_query(
-            "SELECT 1 " \
-            "FROM information_schema.tables " \
-            "WHERE table_schema = 'lyfter_car_rental' " 
-            "AND table_name IN ('car','car_rental','user');"
+            "SELECT table_name "
+            "FROM information_schema.tables "
+            "WHERE table_schema = 'lyfter_car_rental' "
+            "AND table_name = ANY(%s);",
+            (list(tables),)
         )
-        return result
+        return result or []
 
-    def get_record_quantity_in_car_table(self) -> int:
+    def get_count_of_available_cars(self) -> int:
         result = self.db_manager.execute_query(
             "SELECT count(1) as cantidad_registros " \
-            "FROM lyfter_car_rental.car;"
+            "FROM lyfter_car_rental.car " \
+            "WHERE status = 'available';"
         )
         if not result:
             return 0

@@ -1,4 +1,4 @@
-from services.rules.health_rules import HealthCheck
+from services.health_checks import HealthCheck
 from exceptions import HealthRuleError
 
 class HealthService():

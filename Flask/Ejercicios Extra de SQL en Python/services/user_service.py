@@ -16,8 +16,8 @@ class UserService():
     def update_user(self, user_id, user_data):
         new_status = user_data.pop("account_status", None)
         with self.db_manager.transaction():
-            car = self.user_repository.get_by_id_for_update(user_id)
-            if new_status and new_status != car["account_status"]:
+            user = self.user_repository.get_by_id_for_update(user_id)
+            if new_status and new_status != user["account_status"]:
                 self.state_machine.change_status("user", user_id, new_status)
             return self.user_repository.update(user_id, user_data)
 

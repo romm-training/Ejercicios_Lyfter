@@ -5,9 +5,6 @@ from pathlib import Path
 import yaml
 
 from exceptions import InvalidTransitionError
-from repositories.car_repository import CarRepository
-from repositories.car_rental_repository import CarRentalRepository
-from repositories.user_repository import UserRepository
 
 DEFAULT_ENCODING = "utf-8"
 
@@ -28,9 +25,9 @@ def effect(name):
     return _register(EFFECTS, name)
 
 ENTITIES = {
-    "car_rental": {"repo": CarRentalRepository, "column": "status"},
-    "car": {"repo": CarRepository, "column": "status"},
-    "user": {"repo": UserRepository, "column": "account_status"},
+    "car_rental": {"column": "status"},
+    "car": {"column": "status"},
+    "user": {"column": "account_status"},
 }
 
 @dataclass
@@ -81,13 +78,11 @@ def load_transitions(path):
     return table, initial
 
 class StateMachine:
-    def __init__(self, db, table, initial):
+    def __init__(self, db, table, initial, repos):
         self.db = db
         self.table = table
         self.initial = initial
-
-    def _repos(self):
-        return {name: spec["repo"](self.db) for name, spec in ENTITIES.items()}
+        self.repos = repos
 
     def _find(self, entity, current_status, target_status):
         t = self.table.get((entity, current_status, target_status))
@@ -103,7 +98,7 @@ class StateMachine:
     def change_status(self, entity, record_id, target_status):
         column = ENTITIES[entity]["column"]
         with self.db.transaction():
-            repos = self._repos()
+            repos = self.repos
             repo = repos[entity]
             current_record = repo.get_by_id_for_update(record_id)
             current_status = current_record[column]
@@ -123,7 +118,7 @@ class StateMachine:
         column = ENTITIES[entity]["column"]
         target_status = self.initial[entity]
         with self.db.transaction():
-            repos = self._repos()
+            repos = self.repos
             t = self._find(entity, None, target_status)
             ctx = Context(entity=entity, target_status=target_status, repos=repos, data=data)
             self._run(t.get("guards",[]), GUARDS, ctx)
@@ -133,10 +128,12 @@ class StateMachine:
 
             return ctx.current_record
 
-def build_state_machine(db):
+def build_state_machine(db, repos):
+    if set(repos) != set(ENTITIES):
+        raise ValueError(f"Repositorios esperados: {sorted(ENTITIES)}; recibidos: {sorted(repos)}")
     config_path = Path(__file__).resolve().parent.parent / os.environ["STATUS_TRANSITIONS_PATH"]
     from services.rules import car_rental_rules, car_rules, user_rules
     table, initial = load_transitions(config_path)
-    return StateMachine(db, table, initial)
+    return StateMachine(db, table, initial, repos)
 
             

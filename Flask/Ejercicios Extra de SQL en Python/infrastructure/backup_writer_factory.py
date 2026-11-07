@@ -1,6 +1,6 @@
-from infrastructure.backup_writer import BackupWriter
+from services.backup_writer import BackupWriter
 from infrastructure.csv_backup_writer import CsvBackupWriter
-from exceptions import BackupError
+from exceptions import ConfigurationError
 
 def create_backup_writer(writer_type: str, output_dir: str) -> BackupWriter:
     builders = {
@@ -10,4 +10,4 @@ def create_backup_writer(writer_type: str, output_dir: str) -> BackupWriter:
     try:
         return builders[writer_type]()
     except KeyError:
-        raise BackupError(f"BACKUP_WRITER invalido: {type!r}. Opciones: {list(builders)}")
+        raise ConfigurationError(f"BACKUP_WRITER invalido: {writer_type}. Opciones: {list(builders)}")

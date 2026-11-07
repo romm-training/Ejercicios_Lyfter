@@ -53,11 +53,18 @@ def db():
 @pytest.fixture(scope="session")
 def client(db):
     app = Flask(__name__)
-    state_machine = build_state_machine(db)
+    user_repository = UserRepository(db)
+    car_repository = CarRepository(db)
+    car_rental_repository = CarRentalRepository(db)
+    state_machine = build_state_machine(db, {
+        "user": user_repository,
+        "car": car_repository,
+        "car_rental": car_rental_repository,
+    })
     register_error_handlers(app)
-    register_user_routes(app, UserService(UserRepository(db), state_machine, db))
-    register_car_routes(app, CarService(CarRepository(db), state_machine, db))
-    register_car_rental_routes(app, CarRentalService(CarRentalRepository(db), state_machine, db))
+    register_user_routes(app, UserService(user_repository, state_machine, db))
+    register_car_routes(app, CarService(car_repository, state_machine, db))
+    register_car_rental_routes(app, CarRentalService(car_rental_repository, state_machine, db))
     return app.test_client()
 
 

@@ -1,19 +1,20 @@
+class ConfigurationError(Exception):
+    """Configuración inválida al arrancar; no es un error HTTP."""
+
 class AppError(Exception):
-    status_code = 500
-    message = "Error interno de la aplicación."
+    pass
 
 class NotFoundError(AppError):
-    status_code = 404
-    message = "Registro no encontrado."
+    pass
 
 class BusinessRuleError(AppError):
-    status_code = 422
+    pass
 
 class InvalidTransitionError(AppError):
-    status_code = 409
+    pass
 
 class BackupError(AppError):
-    status_code = 500
+    pass
 
-class HealthRuleError(AppError):
-    status_code = 422
+class HealthRuleError(Exception):
+    pass
