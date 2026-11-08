@@ -1,0 +1,86 @@
+user:
+  states: [active, inactive, delinquent]
+  transitions:
+    - from: null
+      to: active
+      guards: [username_and_email_no_exist]
+      effects: []
+    - from: active
+      to: inactive
+      guards: [user_is_active, user_has_no_active_pending_overdue_rentals]
+      effects: []
+    - from: active
+      to: delinquent
+      guards: [user_is_active, user_has_overdue_rentals]
+      effects: []
+    - from: delinquent
+      to: active
+      guards: [user_is_delinquent, user_has_no_overdue_rentals]
+      effects: []
+    - from: inactive
+      to: active
+      guards: [user_is_inactive]
+      effects: []
+car:
+  states: [available, reserved, rented, maintenance, inactive, sold]
+  transitions:
+    - from: null
+      to: available
+      guards: []
+      effects: []
+    - from: available
+      to: maintenance
+      guards: [car_is_available]
+      effects: []
+    - from: available
+      to: inactive
+      guards: [car_is_available]
+      effects: []
+    - from: available
+      to: sold
+      guards: [car_is_available]
+      effects: []
+    - from: maintenance
+      to: available
+      guards: [car_is_in_maintenance]
+      effects: []
+    - from: maintenance
+      to: inactive
+      guards: [car_is_in_maintenance]
+      effects: []
+    - from: inactive
+      to: sold
+      guards: [car_is_inactive]
+      effects: []
+    - from: maintenance
+      to: sold
+      guards: [car_is_in_maintenance]
+      effects: []
+
+car_rental:
+  states: [pending, active, completed, cancelled, overdue]
+  transitions:
+    - from: null
+      to: pending
+      guards: [car_is_available, user_is_active]
+      effects: [car_to_reserved]
+    - from: pending
+      to: active
+      guards: [car_is_reserved, user_is_active]
+      effects: [rental_to_active,car_to_rented]
+    - from: pending
+      to: cancelled
+      guards: [rental_is_pending]
+      effects: [rental_to_cancelled, car_to_available]
+    - from: active
+      to: completed
+      guards: [rental_is_active, car_is_rented]
+      effects: [rental_to_completed, car_to_available]
+    - from: active
+      to: overdue
+      guards: [rental_is_active]
+      effects: [rental_to_overdue, user_to_delinquent]
+    - from: overdue
+      to: completed
+      guards: [rental_is_overdue, user_is_delinquent]
+      effects: [rental_to_completed, user_to_active, car_to_available]
