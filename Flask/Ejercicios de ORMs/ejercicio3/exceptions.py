@@ -8,4 +8,4 @@ class ValidationError(Exception):
     """Dato de entrada inválido según las reglas de negocio."""
 
 class ConflictError(Exception):
-    """Captura integridad en base de datos."""
+    """El recurso entra en conflicto con uno existente (llave duplicada)."""

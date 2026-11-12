@@ -39,5 +39,5 @@ user_car_table = Table(
     Column("car_id", ForeignKey("car.id"), primary_key=True)
 )
 
-#metadata_obj.drop_all(engine)
+metadata_obj.drop_all(engine)
 metadata_obj.create_all(engine)

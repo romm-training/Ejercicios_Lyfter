@@ -10,7 +10,6 @@ class UserDTO(ReadBaseDTO):
     full_name: str
 
 class UserCreateDTO(InputBaseDTO):
-    id: int
     name: str
     full_name: str
 

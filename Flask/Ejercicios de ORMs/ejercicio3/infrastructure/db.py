@@ -1,4 +1,3 @@
-import os
 from sqlalchemy import MetaData, create_engine, Engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 

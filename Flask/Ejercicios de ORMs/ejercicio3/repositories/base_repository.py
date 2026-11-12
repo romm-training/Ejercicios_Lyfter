@@ -1,8 +1,9 @@
 from typing import Any, ClassVar, Generic, Sequence, TypeVar
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
-from ejercicio3.exceptions import InvalidFieldError, NotFoundError
+from ejercicio3.exceptions import InvalidFieldError, NotFoundError, ConflictError
 
 from ejercicio3.infrastructure.db import Base
 
@@ -33,7 +34,10 @@ class BaseRepository(Generic[T]):
     def create(self, **data: Any) -> T:
         entity = self.model(**data)
         self._session.add(entity)
-        self._session.flush()
+        try:
+            self._session.flush()
+        except IntegrityError as e:
+            raise ConflictError(f"{self.model.__name__} duplicado.") from e
         return entity
 
     def update(self, entity_id: int, **data: Any) -> T:
@@ -43,7 +47,10 @@ class BaseRepository(Generic[T]):
         entity = self.get_by_id(entity_id)
         for field, value in data.items():
             setattr(entity, field, value)
-        self._session.flush()
+        try:
+            self._session.flush()
+        except IntegrityError as e:
+            raise ConflictError(f"{self.model.__name__} no pudo ser actualizado.")
         return entity
 
     def delete(self, entity_id: int) -> None:

@@ -1,10 +1,7 @@
-import re
 from typing import Callable
 
 from ejercicio3.repositories.unit_of_work import UnitOfWork
 from ejercicio3.dtos.address_dto import AddressDTO, AddressCreateDTO, AddressUpdateDTO
-
-_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 class AddressService:
     def __init__(self, uow_factory: Callable[[], UnitOfWork]) -> None:

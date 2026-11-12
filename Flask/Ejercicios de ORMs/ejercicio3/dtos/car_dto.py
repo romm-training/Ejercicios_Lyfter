@@ -9,7 +9,6 @@ class CarDTO(ReadBaseDTO):
     year: int
 
 class CarCreateDTO(InputBaseDTO):
-    id: int
     plate: str
     make: str
     model: str

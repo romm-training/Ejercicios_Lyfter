@@ -26,9 +26,6 @@ class UserRepository(BaseRepository[User]):
         user = self.get_by_id(user_id)
         car = self._cars.get_by_id(car_id)
 
-        if user is None or car is None:
-            return False
-
         if car in user.cars:
             user.cars.remove(car)
             self._session.flush()
