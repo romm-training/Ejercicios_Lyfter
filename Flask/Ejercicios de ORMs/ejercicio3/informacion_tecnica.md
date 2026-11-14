@@ -116,12 +116,11 @@ ejercicio3/
 ├── app.py                      # punto de entrada: arma las piezas y corre el demo
 ├── exceptions.py               # errores propios del dominio
 ├── infrastructure/
-│   └── db.py                   # Base declarativa y fábrica de sesiones
+│   └── db.py                   # Base declarativa, fábrica de sesiones y create_schema
 ├── models/
 │   ├── user_model.py           # clase User  → tabla "user"
 │   ├── car_model.py            # clase Car   → tabla "car"
-│   ├── address_model.py        # clase Address → tabla "address"
-│   └── user_car_model.py       # tabla de asociación "user_car"
+│   └── address_model.py        # clase Address → tabla "address"
 ├── repositories/
 │   ├── base_repository.py      # CRUD genérico reutilizable
 │   ├── user_repository.py
@@ -158,20 +157,24 @@ NAMING_CONVENTION = {
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
 
-def create_session_factory(database_url: str) -> sessionmaker:
-    engine: Engine = create_engine(database_url, pool_pre_ping=True)
+def create_session_factory(engine: Engine) -> sessionmaker:
     return sessionmaker(engine, expire_on_commit=False)
+
+def create_schema(engine: Engine) -> None:
+    import ejercicio3.models  # registra los mappers en Base.metadata
+    Base.metadata.create_all(engine)
 ```
 
 **Qué hace cada parte**
 
 1. **`Base`**: la clase madre de todos los modelos. Cuando una clase hereda de `Base`, SQLAlchemy sabe que representa una tabla.
 2. **`NAMING_CONVENTION`**: obliga a que las restricciones tengan nombres predecibles (`uq_car_plate`, `pk_user`...). Sin esto, PostgreSQL inventa nombres aleatorios y es difícil referirse a ellos después (por ejemplo, en migraciones).
-3. **`create_session_factory(url)`**: devuelve una **fábrica** de sesiones. Una fábrica es algo que, cada vez que lo llamas, te entrega una sesión nueva.
-   - `pool_pre_ping=True`: antes de reusar una conexión, verifica que siga viva. Evita errores por conexiones caducadas.
+3. **`create_session_factory(engine)`**: recibe un `Engine` ya creado (no lo crea) y devuelve una **fábrica** de sesiones. Una fábrica es algo que, cada vez que lo llamas, te entrega una sesión nueva.
    - `expire_on_commit=False`: **muy importante**. Por defecto, SQLAlchemy "caduca" los objetos después del `commit`, y si los lees después intenta ir a la BD otra vez. Aquí los servicios convierten el objeto a DTO después del commit, así que se desactiva.
 
-**Patrón: Factory (fábrica).** La función recibe la URL y construye los objetos complejos. **Por qué no se crea el engine al importar el archivo:** si se hiciera, la conexión se configuraría antes de que `load_dotenv()` cargue el `.env`, y el código no sería testeable ni configurable. Ahora quien llama decide cuándo y con qué URL.
+4. **`create_schema(engine)`**: ejecuta `Base.metadata.create_all(engine)`, que crea las tablas que falten a partir de los modelos. No modifica tablas existentes: si cambias un modelo hay que borrar la tabla (`drop_all`) o usar migraciones. Importa `ejercicio3.models` **dentro de la función** a propósito: así los modelos se registran en `Base.metadata` (que si no estaría vacío) y se evita un import circular, porque los modelos importan `Base` desde este mismo archivo.
+
+**Patrón: Factory (fábrica).** La función recibe el engine y construye la fábrica de sesiones. **Por qué no se crea el engine al importar el archivo ni dentro de `db.py`:** si se hiciera al importar, la conexión se configuraría antes de que `load_dotenv()` cargue el `.env`, y el código no sería testeable ni configurable. El engine se crea **una sola vez en `app.py`** (con `pool_pre_ping=True`, que verifica que la conexión siga viva antes de reusarla) y se comparte, así hay un único pool de conexiones por proceso.
 
 ---
 
@@ -182,15 +185,13 @@ class Car(Base):
     __tablename__ = "car"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("user.id"), nullable=True)
     plate: Mapped[str] = mapped_column(String(10), nullable=False, unique=True)
     make: Mapped[str] = mapped_column(String(50), nullable=False)
     model: Mapped[str] = mapped_column(String(50), nullable=False)
     year: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    users: Mapped[list["User"]] = relationship(
-        secondary="user_car",
-        back_populates="cars"
-    )
+    user: Mapped["User | None"] = relationship(back_populates="cars")
 ```
 
 **Cómo leerlo**
@@ -205,19 +206,9 @@ class Car(Base):
 | Relación | Cómo se define | Detalle |
 |---|---|---|
 | `User` 1 ─ N `Address` | `User.addresses` / `Address.user` | `Address` tiene la FK `user_id`. `back_populates` hace que ambos lados se mantengan sincronizados. |
-| `User` N ─ M `Car` | `secondary=user_car` | Una relación muchos a muchos **necesita una tabla intermedia** (`user_car`) con dos llaves foráneas. |
+| `User` 1 ─ N `Car` | `User.cars` / `Car.user` | `Car` tiene la FK `user_id`, **opcional** (`nullable=True`): un carro puede no tener usuario. Un carro tiene a lo sumo un dueño; un usuario puede tener varios carros. No hay tabla intermedia. |
 
-```python
-user_car = Table(
-    "user_car", Base.metadata,
-    Column("user_id", ForeignKey("user.id"), primary_key=True),
-    Column("car_id",  ForeignKey("car.id"),  primary_key=True),
-)
-```
-
-Las dos columnas juntas son la llave primaria (**llave compuesta**). Esto impide asociar el mismo carro al mismo usuario dos veces.
-
-**`cascade="all, delete-orphan"`** en `User.addresses`: al borrar un usuario, se borran sus direcciones. Una dirección sin usuario no tiene sentido en este modelo. En cambio, entre usuario y carro no hay cascada: borrar un usuario no borra los carros, solo las filas de asociación.
+**`cascade="all, delete-orphan"`** en `User.addresses`: al borrar un usuario, se borran sus direcciones. Una dirección sin usuario no tiene sentido en este modelo. En cambio, entre usuario y carro no hay cascada: borrar un usuario no borra los carros, SQLAlchemy les pone `user_id = NULL` (por eso la FK debe ser nullable).
 
 **`TYPE_CHECKING` y strings como `"User"`**: `user_model` necesita conocer `Car` y `car_model` necesita conocer `User`. Si cada uno importara al otro directamente, tendrías un **import circular** (A importa B que importa A) y Python fallaría. La solución es importar solo para los tipos (`if TYPE_CHECKING:`) y referirse a la clase por nombre en texto.
 
@@ -249,7 +240,7 @@ class ConflictError(Exception): ...
 
 ### 5.4 `dtos/`: los datos que viajan entre capas
 
-Los DTOs usan **Pydantic v2**, que valida tipos automáticamente (por ejemplo `EmailStr` rechaza correos mal formados).
+Los DTOs usan **Pydantic v2**, que valida tipos automáticamente (por ejemplo, `year: int` rechaza un texto como `"abc"`).
 
 Hay **dos clases base** donde se centraliza la configuración:
 
@@ -311,7 +302,7 @@ class BaseRepository(Generic[T]):
 class CarRepository(BaseRepository[Car]):
     model = Car
     updatable = frozenset({"plate", "make", "model", "year"})
-    load_options = (selectinload(Car.users),)
+    load_options = (selectinload(Car.user),)
 ```
 
 - **`Generic[T]`**: indica que la clase funciona con "algún modelo T". Aquí `BaseRepository[Car]` le dice a Python y al editor que devuelve objetos `Car`.
@@ -384,17 +375,26 @@ class UserRepository(BaseRepository[User]):
     def associate_car(self, user_id, car_id):
         user = self.get_by_id(user_id)
         car = self._cars.get_by_id(car_id)
-        if car not in user.cars:
-            user.cars.append(car)
-            self._session.flush()
+        if car.user_id is not None and car.user_id != user_id:
+            raise ConflictError("El auto ya esta asociado a otro usuario")
+        user.cars.append(car)
+        self._session.flush()
         return user
+
+    def disassociate_user_car(self, user_id, car_id):
+        car = self._cars.get_by_id(car_id)
+        if car.user_id != user_id:
+            raise ConflictError("El auto no pertenece a ese usuario")
+        car.user = None
+        self._session.flush()
 ```
 
 - Hereda todo el CRUD gratis y agrega lo específico: asociar y desasociar carros.
 - Usa un `CarRepository` **con la misma sesión**, así todo ocurre en la misma transacción.
 - `associate_car` recibe **ids**, no objetos: quien llama no necesita cargar entidades. El repositorio las resuelve (y lanza `NotFoundError` si alguna no existe).
-- `if car not in user.cars` hace la operación **idempotente**: asociar dos veces no duplica ni da error.
-- `user.cars.append(car)` es todo lo que se necesita: SQLAlchemy genera el `INSERT` en la tabla `user_car` por sí solo.
+- Un carro solo puede tener un dueño: si ya pertenece a **otro** usuario se lanza `ConflictError`. Asociarlo de nuevo al mismo usuario es idempotente (no da error ni duplica).
+- `user.cars.append(car)` asigna `car.user_id` por el `back_populates` y mantiene sincronizada la colección `user.cars` ya cargada (asignar solo `car.user_id` la dejaría desactualizada). SQLAlchemy genera el `UPDATE car SET user_id = ...`.
+- `disassociate_user_car` valida que el carro pertenezca a ese usuario (si no, `ConflictError`) y hace `car.user = None`, lo que deja `user_id` en `NULL`. No devuelve nada.
 
 ---
 
@@ -485,19 +485,19 @@ Cada método de servicio sigue **exactamente el mismo molde**:
 ### 5.9 `app.py`: donde todo se conecta
 
 ```python
-def build_car_service() -> CarService:
-    session_factory = create_session_factory(get_database_url())
+def build_car_service(session_factory: sessionmaker) -> CarService:
     return CarService(partial(UnitOfWork, session_factory))
 ```
 
 **Cómo se arma la cadena**
 
-1. `get_database_url()` lee `DATABASE_URL` del entorno (y falla con un mensaje claro si falta).
-2. `create_session_factory(url)` crea la fábrica de sesiones.
-3. `partial(UnitOfWork, session_factory)` crea una "mini-fábrica": cada vez que se llame sin argumentos, produce un `UnitOfWork` ya configurado con esa fábrica de sesiones. Es el `Callable[[], UnitOfWork]` que espera el servicio.
-4. `CarService(...)` recibe esa fábrica.
+1. `main()` lee `DATABASE_URL` con `get_database_url()` (falla con un mensaje claro si falta) y crea **un único engine**.
+2. `create_schema(engine)` crea las tablas que falten.
+3. `create_session_factory(engine)` crea **una sola fábrica de sesiones**, compartida por los tres servicios.
+4. `partial(UnitOfWork, session_factory)` crea una "mini-fábrica": cada vez que se llame sin argumentos, produce un `UnitOfWork` ya configurado con esa fábrica de sesiones. Es el `Callable[[], UnitOfWork]` que espera el servicio.
+5. `CarService(...)` recibe esa fábrica.
 
-**`main()`** carga el `.env`, configura el logging, construye los tres servicios y ejecuta el demo dentro de un `try/except` que traduce los errores de dominio a mensajes legibles:
+**`main()`** carga el `.env`, configura el logging y, dentro de un `try/except/finally`, crea el engine, el esquema y los tres servicios, y ejecuta el demo. Así los errores de arranque (variable faltante, base de datos inaccesible) pasan por el mismo manejo de errores. Los errores se traducen a mensajes legibles:
 
 ```python
 except ValidationError as ve:                                  # Pydantic
@@ -505,7 +505,10 @@ except ValidationError as ve:                                  # Pydantic
 except (NotFoundError, InvalidFieldError, ConflictError) as e: # dominio
     logger.error(f"Operación rechazada: {e}")
 except Exception as e:                                         # lo inesperado
-    logger.error(f"Excepcion general: {e}")
+    logger.exception(f"Excepcion general: {e}")      # conserva el traceback
+finally:
+    if engine is not None:                           # engine = None antes del try
+        engine.dispose()                             # cierra el pool de conexiones
 ```
 
 El orden importa: de lo más específico a lo más general.
@@ -634,7 +637,7 @@ Checklist para replicar este diseño con otras entidades (por ejemplo, `Product`
    Agrega `load_options` si tiene relaciones que necesites cargar.
 4. **Unit of Work**: agrega `self.products = ProductRepository(self._session)` en `__enter__`.
 5. **Servicio** (`services/product_service.py`): copia el molde (abrir UoW → repositorio → commit → DTO).
-6. **Composición** (`app.py`): crea un `build_product_service()` igual a los demás.
+6. **Composición** (`app.py`): crea un `build_product_service(session_factory)` igual a los demás.
 7. **Errores**: captura `NotFoundError`, `ConflictError` e `InvalidFieldError` donde llames al servicio.
 
 **Reglas para no perder el orden**
@@ -656,10 +659,9 @@ Checklist para replicar este diseño con otras entidades (por ejemplo, `Product`
 Para entender dónde está el proyecto hoy (el detalle completo está en `TODO.md`):
 
 - `update()` no traduce `IntegrityError`: cambiar una placa a una que ya existe lanzaría el error crudo de SQLAlchemy.
-- No hay pruebas automáticas ni migraciones (el esquema se crea con `Ejercicio2_y_3_create_tables.py`, un script aparte que borra y recrea las tablas).
-- El demo de `app.py` usa ids fijos en la asociación y desasociación, por lo que solo coincide con filas reales en un esquema recién creado.
-- `disassociate_user_car` tiene un chequeo `is None` que nunca se cumple (porque `get_by_id` ya lanza `NotFoundError`).
-- Hay imports sin usar (`address_service.py`, `db.py`) y una excepción sin uso (`ValidationError` en `exceptions.py`).
+- No hay pruebas automáticas ni migraciones. El esquema lo crea `create_schema` (`create_all`) al arrancar y solo crea tablas faltantes: un cambio en un modelo exige `drop_all` o migraciones (Alembic). `Ejercicio2_y_3_create_tables.py` es un script aparte, redundante y con columnas distintas a las de los modelos.
+- Los DTOs de `Address` no validan el largo máximo (`String(100)` en el modelo): un valor más largo falla en la base de datos, no en Pydantic.
+- Hay una excepción sin uso (`ValidationError` en `exceptions.py`).
 - Los servicios dependen del `UnitOfWork` concreto, no de una abstracción (`Protocol`).
 
 ---

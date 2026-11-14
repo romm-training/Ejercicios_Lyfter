@@ -4,7 +4,6 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ejercicio3.infrastructure.db import Base
-from ejercicio3.models.user_car_model import user_car
 
 if TYPE_CHECKING:
     from ejercicio3.models.address_model import Address
@@ -23,7 +22,6 @@ class User(Base):
     )
 
     cars: Mapped[list["Car"]] = relationship(
-        secondary=user_car, 
-        back_populates="users"
+        back_populates="user"
     )
 

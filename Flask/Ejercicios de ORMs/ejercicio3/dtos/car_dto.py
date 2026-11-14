@@ -3,6 +3,7 @@ from ejercicio3.dtos.input_base_dto import InputBaseDTO
 
 class CarDTO(ReadBaseDTO):
     id: int
+    user_id: int | None
     plate: str
     make: str
     model: str
