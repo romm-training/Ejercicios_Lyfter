@@ -1,4 +1,6 @@
 import logging, os, sys
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -7,11 +9,11 @@ from functools import partial
 from dotenv import load_dotenv
 from pydantic import ValidationError
 
-from ejercicio3.dtos.address_dto import AddressDTO, AddressCreateDTO, AddressUpdateDTO
-from ejercicio3.dtos.user_dto import UserDTO, UserCreateDTO, UserUpdateDTO, UserReadDTO
-from ejercicio3.dtos.car_dto import CarDTO, CarCreateDTO, CarUpdateDTO
+from ejercicio3.dtos.address_dto import AddressCreateDTO, AddressUpdateDTO
+from ejercicio3.dtos.user_dto import UserCreateDTO, UserUpdateDTO
+from ejercicio3.dtos.car_dto import CarCreateDTO, CarUpdateDTO
 from ejercicio3.exceptions import InvalidFieldError, NotFoundError, ConflictError
-from ejercicio3.infrastructure.db import create_session_factory
+from ejercicio3.infrastructure.db import create_schema, create_session_factory
 from ejercicio3.repositories.unit_of_work import UnitOfWork
 from ejercicio3.services.address_service import AddressService
 from ejercicio3.services.user_service import UserService
@@ -31,16 +33,13 @@ def get_database_url() -> str:
         raise RuntimeError("DATABASE_URL no está configurada en las variables de entorno.")
     return url
 
-def build_address_service() -> AddressService:
-    session_factory = create_session_factory(get_database_url())
+def build_address_service(session_factory: sessionmaker) -> AddressService:
     return AddressService(partial(UnitOfWork, session_factory))
 
-def build_user_service() -> UserService:
-    session_factory = create_session_factory(get_database_url())
+def build_user_service(session_factory: sessionmaker) -> UserService:
     return UserService(partial(UnitOfWork, session_factory))
 
-def build_car_service() -> CarService:
-    session_factory = create_session_factory(get_database_url())
+def build_car_service(session_factory: sessionmaker) -> CarService:
     return CarService(partial(UnitOfWork, session_factory))
 
 def run_user_demo(service: UserService) -> int:
@@ -83,7 +82,7 @@ def run_address_demo(service: AddressService, user_id: int) -> int:
     created = service.create_address(
         AddressCreateDTO(
             user_id=user_id, 
-            email_address="john.doe@example.com"
+            address="San Jose, Costa Rica"
         )
     )
     logger.info(f"Dirección creada: {created}")
@@ -101,7 +100,7 @@ def run_address_demo(service: AddressService, user_id: int) -> int:
     logger.info("---- Paso 8: Actualizar Direccion ----")
     updated = service.update_address(
         created.id, 
-        AddressUpdateDTO(email_address="jane.doe@example.com")
+        AddressUpdateDTO(address="Guanacaste, Costa Rica")
     )
     logger.info(f"Dirección actualizada: {updated}")
 
@@ -187,12 +186,17 @@ def run_delete_user(service: UserService, user_id: int) -> None:
 def main() -> None:
     load_dotenv()
     configure_logging()
+    engine = None
 
-    user_service = build_user_service()
-    address_service = build_address_service()
-    car_service = build_car_service()
-    
     try:
+        engine = create_engine(get_database_url(), pool_pre_ping=True)
+        create_schema(engine)
+        session_factory = create_session_factory(engine)
+    
+        user_service = build_user_service(session_factory)
+        address_service = build_address_service(session_factory)
+        car_service = build_car_service(session_factory)
+    
         user_id = run_user_demo(user_service)
         address_id = run_address_demo(address_service, user_id)
         car_id = run_car_demo(car_service)
@@ -208,7 +212,10 @@ def main() -> None:
     except (NotFoundError, InvalidFieldError, ConflictError) as nfe:
         logger.error(f"Operación rechazada: {nfe}")
     except Exception as e:
-        logger.error(f"Excepcion general: {e}")
+        logger.exception(f"Excepcion general.")
+    finally:
+        if engine is not None:
+            engine.dispose()
 
 if __name__ == "__main__":
     main()

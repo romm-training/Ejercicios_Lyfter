@@ -19,17 +19,17 @@ address_table = Table(
     metadata_obj,
     Column("id", Integer, primary_key=True),
     Column("user_id", ForeignKey("user.id"), nullable=False),
-    Column("email_address", String, nullable=False)
+    Column("address", String, nullable=False)
 )
 
 car_table = Table(
     "car",
     metadata_obj,
     Column("id", Integer, primary_key=True),
-    Column("plate", String, nullable=False),
+    Column("plate", String, unique=True, nullable=False),
     Column("make", String, nullable=False),
     Column("model", String, nullable=False),
-    Column("year", String, nullable=False)
+    Column("year", Integer, nullable=False)
 )
 
 user_car_table = Table(
@@ -40,4 +40,4 @@ user_car_table = Table(
 )
 
 metadata_obj.drop_all(engine)
-metadata_obj.create_all(engine)
+#metadata_obj.create_all(engine)
