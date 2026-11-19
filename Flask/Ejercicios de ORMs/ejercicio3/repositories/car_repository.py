@@ -7,4 +7,4 @@ from ejercicio3.models.car_model import Car
 class CarRepository(BaseRepository[Car]):
     model = Car
     updatable = frozenset({"plate", "make", "model", "year"})
-    load_options = (selectinload(Car.users),)
+    load_options = (selectinload(Car.user),)

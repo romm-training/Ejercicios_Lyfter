@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, create_engine, Engine
+from sqlalchemy import MetaData, Engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 NAMING_CONVENTION = {
@@ -12,6 +12,13 @@ NAMING_CONVENTION = {
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
 
-def create_session_factory(database_url: str) -> sessionmaker:
-    engine: Engine = create_engine(database_url, pool_pre_ping=True)
+def create_session_factory(engine: Engine) -> sessionmaker:
     return sessionmaker(engine, expire_on_commit=False)
+
+def create_schema(engine: Engine) -> None:
+    import ejercicio3.models
+    Base.metadata.create_all(engine)
+
+def drop_schema(engine: Engine) -> None:
+    import ejercicio3.models
+    Base.metadata.drop_all(engine)

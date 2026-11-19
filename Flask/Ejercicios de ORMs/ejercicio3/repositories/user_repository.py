@@ -4,6 +4,7 @@ from ejercicio3.repositories.base_repository import BaseRepository
 
 from ejercicio3.models.user_model import User
 from ejercicio3.repositories.car_repository import CarRepository
+from ejercicio3.exceptions import ConflictError
 
 class UserRepository(BaseRepository[User]):
     model = User
@@ -17,18 +18,15 @@ class UserRepository(BaseRepository[User]):
     def associate_car(self, user_id: int, car_id: int) -> User:
         user = self.get_by_id(user_id)
         car = self._cars.get_by_id(car_id)
-        if car not in user.cars:
-            user.cars.append(car)
-            self._session.flush()
+        if car.user_id is not None and car.user_id != user_id:
+            raise ConflictError("El auto ya esta asociado a otro usuario")
+        user.cars.append(car)
+        self._session.flush()
         return user
 
-    def disassociate_user_car(self, user_id: int, car_id: int) -> bool:
-        user = self.get_by_id(user_id)
+    def disassociate_user_car(self, user_id: int, car_id: int) -> None:
         car = self._cars.get_by_id(car_id)
-
-        if car in user.cars:
-            user.cars.remove(car)
-            self._session.flush()
-            return True
-        return False
-        
+        if car.user_id != user_id:
+            raise ConflictError("El auto no pertenece a ese usuario")
+        car.user = None
+        self._session.flush()
