@@ -27,7 +27,7 @@ def register_invoice_routes(
 
     @app.route(f"{_BASE_URL}/<int:invoice_id>", methods=["GET"])
     @guard.require_authentication
-    def get_invoice_id(invoice_id: int):
+    def get_by_id(invoice_id: int):
         if g.current_user["role"] == Role.ADMIN:
             user_id = None
         else:

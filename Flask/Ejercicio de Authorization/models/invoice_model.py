@@ -1,9 +1,14 @@
+from typing import TYPE_CHECKING
 from sqlalchemy import Integer, String, Numeric, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from roles import Role
 from infrastructure.db import Base
 from datetime import date
 from decimal import Decimal
+
+if TYPE_CHECKING:
+    from models.user_model import User
+    from models.invoice_detail_model import InvoiceDetail
 
 class Invoice(Base):
     __tablename__ = "invoice"

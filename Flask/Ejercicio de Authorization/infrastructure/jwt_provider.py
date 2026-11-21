@@ -1,9 +1,11 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import jwt
 
 from exceptions import InvalidTokenError
+from token_type import TokenType
 
 _ALGORITHM = "RS256"
 
@@ -13,17 +15,21 @@ class JwtSigner:
             private_key: str,
             issuer: str,
             audience: str,
-            expires_minutes: int = 15
+            token_type: TokenType,
+            expires_delta: timedelta
     ) -> None:
         self._private_key = private_key
         self._issuer = issuer
         self._audience = audience
-        self._expires = timedelta(minutes=expires_minutes)
+        self._token_type = token_type
+        self._expires = expires_delta
 
     def encode(self, payload: dict[str, Any]) -> str:
         now = datetime.now(timezone.utc)
         claims = {
             **payload,
+            "type": self._token_type.value,
+            "jti": str(uuid.uuid4()),
             "iss": self._issuer,
             "aud": self._audience,
             "iat": now,
@@ -36,10 +42,17 @@ class JwtSigner:
             )
 
 class JwtVerifier:
-    def __init__(self, public_key: str, issuer: str, audience: str) -> None:
+    def __init__(
+            self, 
+            public_key: str, 
+            issuer: str, 
+            audience: str,
+            expected_type: TokenType
+    ) -> None:
         self._public_key = public_key
         self._issuer = issuer
         self._audience = audience
+        self._expected_type = expected_type
 
     def decode(self, token: str) -> dict[str, Any]:
         try:
@@ -50,8 +63,12 @@ class JwtVerifier:
                 issuer=self._issuer,
                 audience=self._audience,
                 options={
-                    "require": ["exp","iat","iss","aud","sub"]
+                    "require": ["exp","iat","iss","aud","sub","type","jti"]
                 }
             )
         except jwt.InvalidTokenError as exc:
             raise InvalidTokenError() from exc
+
+        if payload["type"] != self._expected_type.value:
+            raise InvalidTokenError()
+        return payload

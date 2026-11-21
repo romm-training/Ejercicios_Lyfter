@@ -6,8 +6,10 @@ from pydantic import ValidationError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pathlib import Path
+from datetime import timedelta
 
 from exceptions import ConfigurationError
+from token_type import TokenType
 
 from infrastructure.db import Base, create_schema, create_session_factory
 from infrastructure.jwt_provider import JwtSigner, JwtVerifier
@@ -22,7 +24,7 @@ from repositories.unit_of_work import UnitOfWork
 from services.product_service import ProductService
 from services.user_service import UserService
 from services.authentication_service import AuthenticationService
-from services.protocols import PasswordHasher, TokenSigner
+from services.protocols import PasswordHasher, TokenSigner, TokenVerifier
 from services.invoice_service import InvoiceService
 
 from routes.product_routes import register_product_routes
@@ -56,6 +58,21 @@ def read_key(env_name: str) -> str:
         raise ConfigurationError(f"{env_name} no esta configurada")
     return (BASE_DIR / path).read_text()
 
+def get_int_env(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if not value:
+        return default
+    
+    try:
+        parsed = int(value)
+    except ValueError:
+        raise ConfigurationError(f"{name} debe ser un entero, recibido: {value!r}")
+    
+    if parsed <= 0:
+        raise ConfigurationError(f"{name} debe ser mayor que cero")
+    
+    return parsed
+
 def build_product_service(
         session_factory: sessionmaker) -> ProductService:
     return ProductService(partial(UnitOfWork, session_factory))
@@ -76,12 +93,16 @@ def build_user_service(
 def build_authentication_service(
         session_factory: sessionmaker,
         hasher: PasswordHasher,
-        signer: TokenSigner
+        access_signer: TokenSigner,
+        refresh_signer: TokenSigner,
+        refresh_verifier: TokenVerifier
         ) -> AuthenticationService:
     return AuthenticationService(
         partial(UnitOfWork, session_factory),
         hasher,
-        signer
+        access_signer,
+        refresh_signer,
+        refresh_verifier
     )
 
 
@@ -101,19 +122,30 @@ if __name__ == "__main__":
 
         hasher = WerkzeugPasswordHasher()
 
-        signer = JwtSigner(
-            read_key("JWT_PRIVATE_KEY_PATH"), 
-            JWT_ISSUER, 
-            JWT_AUDIENCE
+        private_key = read_key("JWT_PRIVATE_KEY_PATH")
+        public_key = read_key("JWT_PUBLIC_KEY_PATH")
+
+        access_signer = JwtSigner(
+            private_key, JWT_ISSUER, JWT_AUDIENCE,
+            TokenType.ACCESS,
+            timedelta(minutes=get_int_env("ACCESS_TOKEN_EXPIRES_MINUTES",15))
         )
 
-        verifier = JwtVerifier(
-            read_key("JWT_PUBLIC_KEY_PATH"),
-            JWT_ISSUER,
-            JWT_AUDIENCE
+        refresh_signer = JwtSigner(
+            private_key, JWT_ISSUER, JWT_AUDIENCE,
+            TokenType.REFRESH,
+            timedelta(days=get_int_env("REFRESH_TOKEN_EXPIRES_DAYS",7))
         )
 
-        guard = AuthenticationGuard(verifier)
+        access_verifier = JwtVerifier(
+            public_key, JWT_ISSUER, JWT_AUDIENCE, TokenType.ACCESS
+        )
+
+        refresh_verifier = JwtVerifier(
+            public_key, JWT_ISSUER, JWT_AUDIENCE, TokenType.REFRESH
+        )
+
+        guard = AuthenticationGuard(access_verifier)
 
         product_service = build_product_service(session_factory)
         invoice_service = build_invoice_service(session_factory)
@@ -121,7 +153,9 @@ if __name__ == "__main__":
         authentication_service = build_authentication_service(
             session_factory,
             hasher,
-            signer
+            access_signer,
+            refresh_signer,
+            refresh_verifier
         )
 
         register_product_routes(app, product_service, guard)

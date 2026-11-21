@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from repositories.product_repository import ProductRepository
 from repositories.user_repository import UserRepository
 from repositories.invoice_repository import InvoiceRepository
+from repositories.refresh_token_repository import RefreshTokenRepository
 
 class UnitOfWork:
     def __init__(self, session_factory: sessionmaker[Session]) -> None:
@@ -14,6 +15,7 @@ class UnitOfWork:
         self.products = ProductRepository(self._session)
         self.users = UserRepository(self._session)
         self.invoices = InvoiceRepository(self._session)
+        self.refresh_tokens = RefreshTokenRepository(self._session)
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:

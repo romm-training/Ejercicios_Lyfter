@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 
 from dtos.user_dto import UserLoginDTO
+from dtos.auth_dto import RefreshTokenDTO
 from services.authentication_service import AuthenticationService
 from routes.decorators import AuthenticationGuard
 from roles import Role
@@ -24,4 +25,19 @@ def register_authentication_routes(
             UserLoginDTO.model_validate(user_data)
             )
         return jsonify(token.model_dump(mode="json")), 200
-         
+
+    @app.route(f"{_BASE_URL}/refresh", methods=["POST"])
+    def refresh():
+        data = request.json
+        token = authentication_service.refresh(
+            RefreshTokenDTO.model_validate(data)
+            )
+        return jsonify(token.model_dump(mode="json")), 200
+
+    @app.route(f"{_BASE_URL}/logout", methods=["POST"])
+    def logout():
+        data = request.json
+        authentication_service.logout(
+            RefreshTokenDTO.model_validate(data)
+        )
+        return "", 204
