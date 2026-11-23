@@ -78,12 +78,12 @@ class AuthenticationService():
     def _issue_tokens(self, uow: UnitOfWork, user_id: int, role: str) -> TokenDTO:
         access_token = self._access_signer.encode(
             {"sub": str(user_id), "role": role}
-        ),
+        )
         refresh_token = self._refresh_signer.encode(
             {"sub": str(user_id)}
         )
         claims = self._refresh_verifier.decode(refresh_token)
-        uow.refresh_tokens_create(
+        uow.refresh_tokens.create(
             jti=claims["jti"],
             user_id=user_id,
             expires_at=datetime.fromtimestamp(claims["exp"],tz=timezone.utc)
