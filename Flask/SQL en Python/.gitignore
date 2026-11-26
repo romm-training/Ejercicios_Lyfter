@@ -50,3 +50,8 @@ htmlcov/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Llaves privadas y publicas
+keys/
+infrastructure/keys/
+*.pem
