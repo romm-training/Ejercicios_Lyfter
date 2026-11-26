@@ -13,7 +13,7 @@ def register_product_routes(
         guard: AuthenticationGuard
         ) -> None:
     @app.route(f"{_BASE_URL}/", methods=["GET"])
-    @guard.require_authentication
+    @guard.require_role(Role.ADMIN)
     def get_all_products():
         args = request.args
         products = product_service.get_all()

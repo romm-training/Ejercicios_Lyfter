@@ -54,5 +54,8 @@ class BaseRepository(Generic[T]):
         return entity
 
     def delete(self, entity_id: int) -> None:
-        self._session.delete(self.get_by_id(entity_id))
-        self._session.flush()
+        try:
+            self._session.delete(self.get_by_id(entity_id))
+            self._session.flush()
+        except IntegrityError as e:
+            raise ConflictError(f"{self.model.__name__} tiene registros relacionados.") from e

@@ -19,7 +19,7 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
             raise NotFoundError()
         return entity
 
-    def renove_all_by_user_id(self, user_id: int) -> None:
+    def revoke_all_by_user_id(self, user_id: int) -> None:
         stmt = (
             update(self.model)
             .where(self.model.user_id == user_id)

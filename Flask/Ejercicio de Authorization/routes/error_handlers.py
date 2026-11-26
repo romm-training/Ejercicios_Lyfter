@@ -1,6 +1,7 @@
 import logging
 from flask import jsonify
 from werkzeug.exceptions import HTTPException
+from pydantic import ValidationError
 from exceptions import AppError
 
 logger = logging.getLogger(__name__)
@@ -19,3 +20,8 @@ def register_error_handlers(app) -> None:
     def handle_unexpected(e):
         logger.exception("Error interno no controlado.")
         return jsonify({"error":"Error interno"}), 500
+
+    @app.errorhandler(ValidationError)
+    def handle_validation_error(e):
+        logger.warning("Validación fallida: %s", e.error_count())
+        return jsonify({"error": "Error en validación de datos de entrada."}), 400

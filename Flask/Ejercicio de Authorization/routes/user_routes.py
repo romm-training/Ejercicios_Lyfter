@@ -34,7 +34,7 @@ def register_user_routes(
         return jsonify(created_user.model_dump(mode="json")), 201
 
     @app.route(f"{_BASE_URL}/<int:user_id>", methods=["PUT"])
-    @guard.require_authentication
+    @guard.require_role(Role.ADMIN)
     def update_user(user_id: int):
         user_data = request.json
         updated_user = user_service.update(

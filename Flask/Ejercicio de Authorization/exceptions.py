@@ -20,14 +20,17 @@ class AuthorizationError(AppError):
     status_code = 403
     message = "No tiene permisos para realizar esta accion."
 
-class InvalidFieldError(Exception):
-    pass
+class InvalidFieldError(AppError):
+    status_code = 400
+    message = "Campo de entrada inválido."
 
-class BusinessValidationError(Exception):
-    """Dato de entrada inválido según las reglas de negocio."""
+class BusinessValidationError(AppError):
+    status_code = 422
+    message = "Error de validación."
 
-class ConflictError(Exception):
-    """El recurso entra en conflicto con uno existente (llave duplicada)."""
+class ConflictError(AppError):
+    status_code = 409
+    message = "El recurso entra en conflicto con uno existente (llave duplicada)."
 
 class BusinessRuleError(AppError):
     status_code = 422

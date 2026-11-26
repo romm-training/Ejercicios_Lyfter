@@ -5,7 +5,7 @@ from repositories.unit_of_work import UnitOfWork
 from repositories.product_repository import ProductRepository
 from dtos.invoice_dto import InvoiceDTO, InvoiceCreateDTO, InvoiceUpdateDTO
 from models.invoice_detail_model import InvoiceDetail
-from exceptions import NotFoundError
+from exceptions import NotFoundError, BusinessValidationError
 
 class InvoiceService:
     def __init__(
@@ -22,7 +22,18 @@ class InvoiceService:
         with self._uow_factory() as uow:
             details = []
             for detail in data.invoice_details:
-                product = uow.products.get_by_id(detail.product_id)
+                product = uow.products.get_by_id_for_update(
+                    detail.product_id
+                    )
+
+                if product.stock < detail.quantity:
+                    raise BusinessValidationError(
+                        f"Stock insuficiente para '{product.name}': "
+                        f"disponible: {product.stock}, solicitado {detail.quantity}."
+                        )
+
+                product.stock -= detail.quantity
+
                 price = Decimal(str(product.price))
                 amount = price * detail.quantity
 

@@ -56,7 +56,7 @@ class JwtVerifier:
 
     def decode(self, token: str) -> dict[str, Any]:
         try:
-            return jwt.decode(
+            payload = jwt.decode(
                 token,
                 self._public_key,
                 algorithms=[_ALGORITHM],
